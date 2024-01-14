@@ -1,30 +1,51 @@
 import { createRouter, createWebHistory } from 'vue-router';
-// import { useAuthStore } from '@/store/authStore';
+import { useAuthStore } from '@/store/authStore';
 import LandingHome from '@/views/LandingHome.vue';
 import Login from '@/views/mLogin.vue';
-import { supabase } from '@/services/supabase';
+import ComandaDetail from '@/views/ComandaDetail.vue'
+import Clientes from '@/views/Clientes.vue'
+import Mesas from '@/views/Mesas.vue'
+import Productos from '@/views/Productos.vue'
 
 const routes = [
   {
     path: '/',
     name: 'mLogin',
     component: Login,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/landingHome',
     name: 'LandingHome',
     component: LandingHome,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/comandas/:id',
     name: 'ComandaDetail',
-    component: () => import('@/views/ComandaDetail.vue'),
-    meta: { requiresAuth: true }
+    component: ComandaDetail,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/clientes',
+    name: 'Clientes',
+    component: Clientes,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/mesas',
+    name: 'Mesas',
+    component: Mesas,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/productos',
+    name: 'Productos',
+    component: Productos,
+    meta: { requiresAuth: true },
   },
   // ... otras rutas
-];
+]
 
 const router = createRouter({
   history: createWebHistory(),
@@ -32,27 +53,14 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  // const authStore = useAuthStore();
-  // const user = authStore.user || await supabase.auth.getUser();
+  const authStore = useAuthStore();
 
-  // if (to.meta.requiresAuth && !user) {
-  //   next({ name: 'mLogin' });
-  // } else if (!to.meta.requiresAuth && user) {
-  //   next({ name: 'LandingHome' });
-  // } else {
-  //   next();
-  // }
-
-  const session = supabase.auth.getSession();
-
-  if (to.matched.some(record => record.meta.requiresAuth) && !session) {
-    // Si la ruta requiere autenticación y no hay sesión, redirige al login
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'mLogin' });
-  } else if (!to.matched.some(record => record.meta.requiresAuth) && session) {
-    // Si la ruta no requiere autenticación y hay sesión, redirige a la Home
+  } else if (!to.meta.requiresAuth && authStore.isAuthenticated) {
     next({ name: 'LandingHome' });
   } else {
-    next(); // En cualquier otro caso, procede con la navegación normal
+    next();
   }
 });
 

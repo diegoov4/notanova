@@ -12,7 +12,7 @@
     </div>
     <div class="navbar-end">
       <span class="navbar-item">{{ user?.email }}</span> <!-- Mostrar el email del usuario autenticado -->
-      <img src="@/assets/logout_w.png" class="logout-button" alt="NotaNova Logo" />
+      <img src="@/assets/logout_w.png" @click="logout" class="logout-button" alt="NotaNova Logo" />
     </div>
   </nav>
   <!-- Diálogo para nueva comanda -->
@@ -21,6 +21,7 @@
   
 <script>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/services/supabase';
 import NewComandaDialog from '@/components/NewComandaDialog.vue';
@@ -33,11 +34,13 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const showNewComandaDialog = ref(false);
+    const router = useRouter()
 
     const logout = async () => {
       await supabase.auth.signOut();
       authStore.clearUser();
       // Aquí se podría incluir lógica adicional después del cierre de sesión
+      router.push({ name: 'mLogin' });
     };
 
     return {

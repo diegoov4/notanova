@@ -1,23 +1,23 @@
 <template>
-    <div class="product-dialog-overlay" @click.self="close">
-      <div class="product-dialog">
-        <header class="product-dialog-header">
-          <h3>Seleccionar Productos</h3>
-        </header>
-        <div class="product-dialog-body">
-          <div v-for="producto in productos" :key="producto.id" class="product-item">
-            <label :for="'product-' + producto.id">{{ producto.titulo }}</label>
-            <input type="checkbox" :id="'product-' + producto.id" :value="producto" v-model="selectedProducts">
-          </div>
+  <div class="product-dialog-overlay" @click.self="close">
+    <div class="product-dialog">
+      <header class="product-dialog-header">
+        <h3>Seleccionar Productos</h3>
+      </header>
+      <div class="product-dialog-body">
+        <div v-for="producto in productos" :key="producto.id" class="product-item">
+          <label :for="'product-' + producto.id">{{ producto.titulo }}</label>
+          <input type="checkbox" :id="'product-' + producto.id" :value="producto" v-model="selectedProducts">
         </div>
-        <footer class="product-dialog-footer">
-          <button @click="confirmSelection">Confirmar</button>
-        </footer>
       </div>
+      <footer class="product-dialog-footer">
+        <button @click="confirmSelection">Confirmar</button>
+      </footer>
     </div>
-  </template>
-  
-  <script>
+  </div>
+</template>
+
+<script>
   import { ref, onMounted } from 'vue';
   import { supabase } from '@/services/supabase';
   
@@ -50,9 +50,9 @@
       };
     }
   };
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   /* Estilos para el diálogo de selección de productos */
   .product-dialog-overlay {
     /* ... */
@@ -65,5 +65,5 @@
   .product-item {
     /* ... */
   }
-  </style>
+</style>
   

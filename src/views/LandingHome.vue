@@ -2,9 +2,9 @@
     <section class="home">
         <h1 class="title">Comandas Activas</h1>
         <div class="comandas-list">
-            <div v-for="comanda in comandas" :key="comanda.id" class="comanda-item" @click="selectComanda(comanda.id)">
+            <div v-for="comanda in activeComandas" :key="comanda.id" class="comanda-item" @click="selectComanda(comanda.id)">
                 <div class="comanda-content">
-                    <h2>{{ comanda.nombre_cliente || 'Cliente Desconocido' }}</h2>
+                    <h2>{{ comanda.clientes.nombre_cliente || 'Cliente Desconocido' }}</h2>
                     <p>Total: {{ formatCurrency(comanda.total) }}</p>
                 </div>
                 <!-- La imagen de la hoja se establece como fondo del item de comanda -->
@@ -15,7 +15,7 @@
   
   
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase } from '@/services/supabase';
 
@@ -28,16 +28,19 @@ export default {
         onMounted(async () => {
             const { data, error } = await supabase
                 .from('comandas')
-                .select('*')
+                .select('*, clientes (nombre_cliente)')
                 .order('created_at', { ascending: false });
 
             if (error) {
                 console.error('Error al obtener comandas:', error);
                 return;
             }
-
             comandas.value = data;
         });
+
+        const activeComandas = computed(()=>{
+            return comandas.value.filter((comanda) => comanda.status === 'open');
+        })
 
         const formatCurrency = (value) => {
             if (value) {
@@ -53,7 +56,7 @@ export default {
             router.push({ name: 'ComandaDetail', params: { id: comandaId } });
         };
 
-        return { comandas, selectComanda, formatCurrency };
+        return { comandas, activeComandas, selectComanda, formatCurrency };
     },
     filters: {
         currency(value) {

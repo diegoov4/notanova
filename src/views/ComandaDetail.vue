@@ -2,7 +2,7 @@
     <div class="comanda-detail-container">
         <header>
             <!-- Cabecera con información del cliente -->
-            <h2>{{ comanda?.nombre_cliente || 'Cliente Desconocido' }}</h2>
+            <h2>{{ comanda?.clientes.nombre_cliente || 'Cliente Desconocido' }}</h2>
             <p>Total: {{ formatCurrency(comanda?.total) }}</p>
         </header>
         <ul class="pedido-list">
@@ -22,22 +22,23 @@
 
 <script>
 import { ref, onMounted } from 'vue';
-import { useParams } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router'
 import { supabase } from '@/services/supabase';
 
 export default {
     name: 'ComandaDetail',
     setup() {
-        const params = useParams();
         const comanda = ref(null);
+        const router = useRouter();
+        const route = useRoute();
 
         onMounted(async () => {
             const { data, error } = await supabase
                 .from('comandas')
-                .select('*')
-                .eq('id', params.id)
+                .select('*, clientes (*), mesas(*), locales_master(*)')
+                .eq('id', route.params.id)
                 .single();
-
+            console.log(data);
             if (error) {
                 console.error('Error al obtener detalles de la comanda:', error);
                 return;
@@ -69,6 +70,7 @@ export default {
             }
 
             // Redirigir al Home o actualizar la UI según sea necesario
+            router.push({ name: 'LandingHome' });
         };
 
         const eliminarPedido = async (idProducto) => {
