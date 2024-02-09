@@ -1,19 +1,16 @@
 <template>
   <div class="login-container">
-    <h1>Iniciar Sesión</h1>
+    <h1 class="title">Iniciar Sesión</h1>
     <form @submit.prevent="handleLogin">
       <div class="field">
-        <label for="email">Email</label>
-        <input type="email" id="email" v-model="email" required />
+        <input type="email" id="email" v-model="email" required placeholder="Email" />
       </div>
       <div class="field">
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" v-model="password" required />
+        <input type="password" id="password" v-model="password" required placeholder="Contraseña" />
       </div>
       <div class="actions">
-        <button type="submit" class="button is-primary">Acceder</button>
+        <button type="submit" class="button button-green">ACCEDER</button>
       </div>
-      <!-- Mensajes de error o confirmación -->
       <p v-if="error" class="error-message">{{ error }}</p>
     </form>
   </div>
@@ -22,17 +19,19 @@
 <script>
 import { ref } from 'vue';
 import { useAuthStore } from '@/store/authStore';
+import { useCommonStore } from '@/store/commonStore';
 import { supabase } from '@/services/supabase';
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'mLogin',
   setup() {
+    const router = useRouter()
+    const authStore = useAuthStore();
+    const commonStore = useCommonStore();
     const email = ref('');
     const password = ref('');
     const error = ref('');
-    const authStore = useAuthStore();
-    const router = useRouter()
 
     const handleLogin = async () => {
       const { data: { user }, error: loginError } = await supabase.auth.signInWithPassword({
@@ -41,10 +40,16 @@ export default {
       });
 
       if (loginError) {
-        error.value = loginError.message;
+        // error.value = loginError.message;
+        error.value = "Error de credenciales";
       } else {
         authStore.setUser(user);
-        router.push({ name: 'LandingHome' }); // Redirige al usuario a la página de inicio después del login
+        console.log('AUTH_USER:', user);
+
+        await commonStore.fetchLocalByEmail(user.email);
+
+        //Redirigimos al inicio
+        router.push({ name: 'LandingHome' });
       }
     };
 
@@ -61,53 +66,47 @@ export default {
 <style scoped>
 .login-container {
   max-width: 400px;
-  margin: 2rem auto;
-  padding: 1rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 6rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #ccc;
+}
+
+.title {
+  margin-bottom: 2rem;
+  color: #333;
+  font-size: 2rem;
+  font-weight: 300;
 }
 
 .field {
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.label {
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.input {
   width: 100%;
-  padding: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.field input {
+  width: 100%;
+  padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: #be8745;
+  box-shadow: 0 0 0 2px rgba(190, 135, 69, 0.2);
 }
 
 .actions {
-  margin-top: 1rem;
-}
-
-.button {
   width: 100%;
-  padding: 0.75rem;
-  font-size: 1rem;
-  color: white;
-  background-color: var(--button-color, #333);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  display: flex;
+  justify-content: center;
 }
-
-.button:hover {
-  background-color: var(--button-hover-color, #555);
-}
-
-.error-message {
-  color: var(--error-color, red);
-  margin-top: 1rem;
-}
-</style>  
+</style>

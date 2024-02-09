@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './App';
 import router from './router';
 
@@ -8,7 +9,11 @@ import './assets/global.css';
 
 const app = createApp(App);
 
-app.use(createPinia()); // Usa Pinia para el estado global
-app.use(router); // Usa Vue Router para la navegación
+// Usa Pinia para el estado global
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+
+app.use(pinia);
+app.use(router);
 
 app.mount('#app');

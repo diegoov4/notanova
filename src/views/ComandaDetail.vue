@@ -1,54 +1,130 @@
 <template>
     <div class="comanda-detail-container">
-        <header>
-            <!-- Cabecera con información del cliente -->
-            <h2>{{ comanda?.clientes.nombre_cliente || 'Cliente Desconocido' }}</h2>
-            <p>Total: {{ formatCurrency(comanda?.total) }}</p>
+
+        <!-- Cabecera Comanda -->
+        <header class="comanda-header">
+            <h2 class="comanda-title">{{ comanda?.clientes.nombre_cliente || 'Cliente Desconocido' }}</h2>
+            <p class="comanda-total">Total:
+                <span  @click="cerrarComanda" class="comanda-total-price">{{ formatCurrency(comanda?.total) || '0 €' }}</span>
+            </p>
         </header>
-        <ul class="pedido-list">
-            <!-- Lista de pedidos -->
-            <li v-for="pedido in comanda?.pedidos" :key="pedido.id" class="pedido-item">
-                <span>{{ pedido.nombre_producto }}</span>
-                <input type="number" v-model.number="pedido.cantidad" />
-                <button @click="eliminarPedido(pedido.id)">X</button>
-            </li>
-        </ul>
-        <footer>
-            <!-- Botones de acción -->
-            <button @click="cerrarComanda">Cerrar Comanda</button>
+
+        <!-- Listado de Productos -->
+        <section class="pedido-section">
+            <ul class="pedido-list">
+                <li v-for="producto_b in comanda?.comandas_productos" :key="producto_b.id" class="pedido-item">
+                    <div class="product-image-container">
+                        <img :src="producto_b.producto.imagen" class="product-image" :alt="producto_b.producto.titulo" />
+                    </div>
+                    <div class="pedido-info">
+                        <span class="pedido-nombre">{{ producto_b.producto.titulo }}</span>
+                        <!-- <div class="quantity-controls">
+                            <button @click="decrement(producto_b)" class="quantity-btn">-</button>
+                            <input v-model.number="producto_b.cantidad" min="0" readonly>
+                            <button @click="increment(producto_b)" class="quantity-btn">+</button>
+                        </div> -->
+                        <div class="number-input">
+                            <button @click="decrement(producto_b)">-</button>
+                            <input v-model.number="producto_b.cantidad" min="0" type="number">
+                            <button @click="increment(producto_b)">+</button>
+                        </div>
+                    </div>
+                    <button @click="eliminarProducto(producto_b.producto)" class="button button-red">×</button>
+                </li>
+            </ul>
+        </section>
+        
+        <!-- Dialogo Selección Productos -->
+        <div class="product-dialog-container" v-if="showProductSelection">
+            <ProductSelectionDialog @selectedProducts="showProducts" @close="showProductSelection = false" />
+        </div>
+
+        <!-- Footer. Editar comanda y Cerrar (pagar) -->
+        <footer class="comanda-footer">
+            <div class="edit-buttons">
+                <button @click="showProductSelection = true" class="button button-yellow">Productos</button>
+                <button @click="updateComanda" class="button button-green">Guardar</button>
+            </div>
+            <!-- DMO: CAmbiar y poner como icono en la cabecera en pequeño a la dcha -->
+            <!-- <button @click="cerrarComanda" class="button button-green">PAGAR</button> -->
+            <button @click="goToLandingHome" class="button button-salir">Salir</button>
         </footer>
     </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router'
-import { supabase } from '@/services/supabase';
+import { ref, onMounted, toRef } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useComandaStore } from '@/store/comandaStore';
+import ProductSelectionDialog from '@/components/ProductSelectionDialog.vue';
 
 export default {
     name: 'ComandaDetail',
+    components: {
+        ProductSelectionDialog
+    },
     setup() {
-        const comanda = ref(null);
+        const comandaStore = useComandaStore();
+        const comanda = toRef(comandaStore, "comanda");
         const router = useRouter();
         const route = useRoute();
+        const showProductSelection = ref(false);
 
-        onMounted(async () => {
-            const { data, error } = await supabase
-                .from('comandas')
-                .select('*, clientes (*), mesas(*), locales_master(*)')
-                .eq('id', route.params.id)
-                .single();
-            console.log(data);
-            if (error) {
-                console.error('Error al obtener detalles de la comanda:', error);
-                return;
+        const increment = async (producto) => {
+            producto.cantidad++;
+            await comandaStore.updateProductQuantity(comanda.value.id, producto.producto.id, producto.cantidad);
+            recalcularTotal();
+        };
+
+        const decrement = async (producto) => {
+            if (producto.cantidad > 1) {
+                producto.cantidad--;
+                await comandaStore.updateProductQuantity(comanda.value.id, producto.producto.id, producto.cantidad);
+                recalcularTotal();
             }
+        };
 
-            comanda.value = data;
-        });
+        function recalcularTotal() {
+            let total = 0;
+            comanda.value.comandas_productos.forEach((item) => {
+                total += item.cantidad * item.producto.precio;
+            });
+            comanda.value.total = total;
+        }
+
+        const showProducts = (selectedProducts) => {
+            console.log('[STORE_showProducts]selectedProducts: ', selectedProducts);
+            console.log('[STORE_showProducts]comanda.value.comandas_productos: ', comanda.value.comandas_productos);
+            // Añadir productos seleccionados a la comanda existente
+            selectedProducts.forEach(product => {
+                let existingProduct = comanda.value.comandas_productos.find(p => p.producto.id === product.id);
+                if (existingProduct) {
+                    existingProduct.cantidad += product.cantidad;
+                } else {
+                    comanda.value.comandas_productos.push({
+                        producto: product,
+                        cantidad: product.cantidad,
+                    });
+                }
+            });
+            recalcularTotal();
+            showProductSelection.value = false;
+
+            // Actualizar la comanda en el backend con los nuevos productos
+            console.log('Lista Productos a Actualizar: ', comanda.value.comandas_productos);
+            comandaStore.updateProductsComanda(comanda.value.id, comanda.value.comandas_productos);
+        };
+
+        const fetchComandaById = async () => {
+            if (route.params.id) {
+                await comandaStore.fetchComandaById(route.params.id);
+            } else {
+                console.error('Invalid Param ID: ', route.params.id);
+            }
+        };
+        onMounted(fetchComandaById);
 
         const formatCurrency = (value) => {
-            // Una función de utilidad para formatear el total como moneda
             if (value) {
                 return new Intl.NumberFormat('es-ES', {
                     style: 'currency',
@@ -58,76 +134,74 @@ export default {
             return '';
         };
 
-        const cerrarComanda = async () => {
-            const { error } = await supabase
-                .from('comandas')
-                .update({ status: 'closed' })
-                .eq('id', comanda.value.id);
+        const goToLandingHome = () => {
+            router.push({ name: 'LandingHome' });
+        }
 
-            if (error) {
-                console.error('Error al cerrar la comanda:', error);
+        const cerrarComanda = async () => {
+            //Primero confirmamos si quiere pagar
+            if (!confirm(`¿Quieres cobrar y cerrar la comanda?`)) {
                 return;
             }
-
-            // Redirigir al Home o actualizar la UI según sea necesario
+            //Cerramos comanda
+            const cerrado = await comandaStore.closeComanda(comanda.value.id);
+            if (!cerrado) {
+                alert('Ha habido un error al cerrar la comanda. Contacte con el administrador');
+            }
+            // Redirigir a la Home
             router.push({ name: 'LandingHome' });
         };
 
-        const eliminarPedido = async (idProducto) => {
-            //--Lógica para eliminar un pedido de la comanda--
-
-            // Confirmación antes de eliminar
-            if (!confirm('¿Estás seguro de que deseas eliminar este pedido?')) {
+        const eliminarProducto = async (producto) => {
+            console.log('EliminarProducto: ', producto)
+            if (!confirm(`¿Estás seguro de que deseas eliminar "${producto.titulo}" de la comanda?`)) {
                 return;
             }
-
-            const { data: pedidoEliminado, error } = await supabase
-                .from('comandas_productos')
-                .delete()
-                .match({ id_comanda: comanda.value.id, id_producto: idProducto })
-                .single();
-
-            if (error) {
-                console.error('Error al eliminar el pedido:', error);
-                return;
-            }
-
-            // Eliminar el pedido de la lista en la interfaz de usuario
-            comanda.value.pedidos = comanda.value.pedidos.filter(pedido => pedido.id !== pedidoEliminado.id_producto);
-
-            // Recalcular el total (si la lógica de negocio lo requiere)
-            // Esto asume que necesitas recalcular el total manualmente.
-            // Si tu backend lo hace automáticamente, omitir este paso. DMO:Check
-            comanda.value.total = comanda.value.pedidos.reduce((total, pedido) => {
-                return total + pedido.precio * pedido.cantidad;
-            }, 0);
+            await comandaStore.deleteProducto(comanda.value.id, producto.id);
         };
 
-        return { comanda, cerrarComanda, eliminarPedido, formatCurrency };
+        return { comanda, cerrarComanda, showProductSelection, goToLandingHome, showProducts, eliminarProducto, increment, decrement, formatCurrency };
     },
 };
 </script>
-  
+
 <style scoped>
 .comanda-detail-container {
     max-width: 600px;
     margin: 2rem auto;
     padding: 1rem;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-header {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
+.comanda-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
 }
 
-h2 {
+.comanda-title {
+    font-size: 1.75rem;
+    margin-right: auto;
     color: #333;
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+}
+
+.comanda-total {
+    font-size: 1.25rem;
+    margin-left: auto;
+    color: #333;
+}
+
+.comanda-total .comanda-total-price{
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.pedido-section {
+    margin-bottom: 1rem;
 }
 
 .pedido-list {
@@ -138,57 +212,63 @@ h2 {
 
 .pedido-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
+    margin: 1rem 0 1rem 0;
+    background: #f9f9f9;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.pedido-item:last-child {
-    border-bottom: none;
+.pedido-item .button-red{
+    padding: 10px 18px;
 }
 
-.pedido-item span {
+.product-image-container {
+    flex-shrink: 0;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+.pedido-info {
+    padding: 0.5rem;
     flex-grow: 1;
 }
 
-.pedido-item input {
-    width: 50px;
-    padding: 0.5rem;
-    margin: 0 1rem;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.pedido-nombre {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
 }
 
-button {
-    background-color: #ff5252;
+.quantity-controls {
+    display: flex;
+    align-items: center;
+}
+
+.quantity-btn {
     border: none;
-    padding: 0.5rem 1rem;
-    color: white;
-    border-radius: 4px;
+    background: #e0e0e0;
+    padding: 0.25rem 0.5rem;
+    margin: 0;
     cursor: pointer;
 }
 
-button:hover {
-    background-color: #ff7676;
-}
 
-footer {
-    margin-top: 1rem;
-    text-align: right;
+.comanda-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
 }
-
-footer button {
-    background-color: #4caf50;
-    border: none;
-    padding: 0.5rem 1rem;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-footer button:hover {
-    background-color: #66bb6a;
+/* Expandimos los botones por todo el footer */
+/* .comanda-footer button {
+    flex-grow: 1;
+    margin: 0 5px;
+} */
+.comanda-footer .edit-buttons button{
+    margin: 0 12px 0 0;
 }
 </style>

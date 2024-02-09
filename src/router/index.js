@@ -44,7 +44,6 @@ const routes = [
     component: Productos,
     meta: { requiresAuth: true },
   },
-  // ... otras rutas
 ]
 
 const router = createRouter({

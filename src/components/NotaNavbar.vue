@@ -1,11 +1,10 @@
 <template>
   <nav class="navbar">
     <div class="logo">
-      <img src="@/assets/logo_final.png" alt="NotaNova Logo" />
+      <img src="@/assets/logo_final.png" @click="goToLandingHome" class="home-button" alt="NotaNova Logo" />
     </div>
     <div class="navbar-menu">
-      <router-link to="/comandas" class="navbar-item" @click.prevent="showNewComandaDialog = true">Nueva
-        Comanda</router-link>
+      <button @click="openDialog" class="button button-green">+ Comanda</button>
       <router-link to="/productos" class="navbar-item">Productos</router-link>
       <router-link to="/clientes" class="navbar-item">Clientes</router-link>
       <router-link to="/mesas" class="navbar-item">Mesas</router-link>
@@ -15,38 +14,42 @@
       <img src="@/assets/logout_w.png" @click="logout" class="logout-button" alt="NotaNova Logo" />
     </div>
   </nav>
-  <!-- Diálogo para nueva comanda -->
-  <NewComandaDialog v-if="showNewComandaDialog" @close="showNewComandaDialog = false" />
 </template>
   
 <script>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/authStore';
+import { useCommonStore } from '@/store/commonStore';
 import { supabase } from '@/services/supabase';
-import NewComandaDialog from '@/components/NewComandaDialog.vue';
 
 export default {
   name: 'NotaNavbar',
-  components: {
-    NewComandaDialog,
-  },
   setup() {
     const authStore = useAuthStore();
-    const showNewComandaDialog = ref(false);
-    const router = useRouter()
+    const commonStore = useCommonStore();
+    const router = useRouter();
 
+    const openDialog = () => {
+      router.push({ name: 'LandingHome' });
+      commonStore.setShowNewComandaDialog(true);
+    };
+    
     const logout = async () => {
       await supabase.auth.signOut();
       authStore.clearUser();
-      // Aquí se podría incluir lógica adicional después del cierre de sesión
+      commonStore.clearData();
       router.push({ name: 'mLogin' });
     };
 
+    const goToLandingHome = () => {
+      router.push({ name: 'LandingHome' });
+    }
+
     return {
       user: authStore.user,
+      openDialog,
+      goToLandingHome,
       logout,
-      showNewComandaDialog,
     };
   },
 };
@@ -57,16 +60,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 1rem;
-  background-color: var(--color-primary, #665f56);
-  box-shadow: 0 7px 4px rgba(0, 0, 0, 0.4);
-  color: var(--text-color, white);
+  padding: 0.5rem 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #333;
   z-index: 1000;
-}
-
-/* Sombreado y opacidad en la cabecera */
-.logo img {
-  height: 50px;
 }
 
 .navbar-menu {
@@ -74,14 +72,19 @@ export default {
 }
 
 .navbar-item {
-  padding: 6px;
-  margin-right: 1rem;
-  color: var(--text-color, white);
+  padding: 0.75rem 1rem;
+  margin: 0 0.5rem;
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  color: #333;
+  transition: background-color 0.3s;
 }
 
-.navbar-item:hover {
-  background-color: rgba(55, 55, 55, 0.5);
-  border-radius: 5px;
+.navbar-item:hover{
+  background-color: #f2f2f2;
+  text-decoration: none;
 }
 
 .navbar-end {
@@ -94,20 +97,18 @@ export default {
 /* ----------------------------------------------------------------- */
 .logout-button {
   cursor: pointer;
-  position: relative;
-  /* Posicionamiento relativo para el pseudo-elemento */
-  /* background: url('@/assets/logout_w.png') no-repeat center center; */
-  color: azure;
-  height: 30px;
+  font-size: 1.5rem;
+  margin-left: 1rem;
+  color: #019365;
+  height: 25px;
 }
 
-.logout-button:hover::before {
-  content: 'Cerrar Sesión';
-  /* Texto alternativo al hacer hover */
-  /* position: absolute;
-  left: 0;
-  top: -30px;
-  white-space: nowrap;
-  font-size: 12px; */
+.logout-button:hover {
+  color: #be8745; /* Cambiar color al hacer hover */
+}
+
+/* Estilo para los íconos si usas FontAwesome o similar */
+.icon {
+  transition: color 0.3s ease; /* Transición suave para el color */
 }
 </style>  

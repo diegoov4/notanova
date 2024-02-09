@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <Navbar v-if="authStore.isAuthenticated" />
-    <main class="main">
+    <Navbar v-if="authStore.isAuthenticated" @open-dialog="showNewComandaDialog = true" />
+    <main class="main" :class="{ 'with-navbar': authStore.isAuthenticated, 'without-navbar': !authStore.isAuthenticated }">
       <router-view />
     </main>
     <!-- <Footer v-if="isAuthenticated" /> -->
@@ -21,6 +21,7 @@ export default {
     const authStore = useAuthStore();
     return {
       authStore,
+      showNewComandaDialog: false,
     };
   },
 };
