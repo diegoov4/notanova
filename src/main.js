@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+import '@fortawesome/fontawesome-free/css/all.css'; // Importa todo Font Awesome
 import App from './App';
 import router from './router';
 

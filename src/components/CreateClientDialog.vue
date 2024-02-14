@@ -4,7 +4,9 @@
             <div class="dialog create-client-dialog">
                 <header class="dialog-header">
                     <h3>Nuevo Cliente</h3>
-                    <button class="close-button" @click="close">X</button>
+                    <button class="close-button" @click="close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </header>
                 <div class="dialog-body">
                     <input type="text" v-model="newClientName" placeholder="Nombre del cliente" class="input-client-name" @keyup.enter="addNewClient" />
@@ -16,15 +18,17 @@
 </template>
   
 <script>
-import { ref } from 'vue';
-import { useCommonStore } from '@/store/commonStore';
+import { ref, toRef } from 'vue';
+import { useAuthStore } from '@/store/authStore';
 import { useClientStore } from '@/store/clienteStore';
 
 export default {
     setup(_, { emit }) {
         const newClientName = ref('');
-        const commonStore = useCommonStore();
+        const authStore = useAuthStore();
         const clientStore = useClientStore();
+        const userMasterData = toRef(authStore, "userMasterData");
+        const master_id       = userMasterData.value.id;
 
         const addNewClient = async () => {
             if (!newClientName.value.trim()) {
@@ -33,11 +37,8 @@ export default {
             }
             //Create Client
             try {
-                if (commonStore.getUserLocal && commonStore.getUserLocal.length > 0) {
-                    console.log('ADDNEWCLIENT_getUserLocal[0]', commonStore.getUserLocal[0]);
-
-                    await clientStore.createClient(newClientName.value, commonStore.getUserLocal[0].id);
-
+                if (master_id) {
+                    await clientStore.createClient(newClientName.value, master_id);
                     newClientName.value = '';
                     emit('clientCreated');
                     close();

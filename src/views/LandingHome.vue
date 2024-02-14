@@ -4,7 +4,7 @@
         <div class="comandas-list">
             <div v-for="comanda in comandas" :key="comanda.id" class="comanda-item" @click="selectComanda(comanda.id)">
                 <div class="comanda-content">
-                    <h2>{{ comanda.clientes.nombre_cliente || 'Cliente Desconocido' }}</h2>
+                    <h2>{{ comanda.clientes.nombre || 'Cliente Desconocido' }}</h2>
                     <p>Total: 
                         <span class="comanda-total-price">{{ formatCurrency(comanda?.total) || '0 €' }}</span>    
                     </p>
@@ -19,6 +19,7 @@
 <script>
 import { onMounted, toRef } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/authStore';
 import { useCommonStore } from '@/store/commonStore';
 import { useComandaStore } from '@/store/comandaStore';
 import NewComandaDialog from '@/components/NewComandaDialog.vue';
@@ -29,20 +30,21 @@ export default {
         NewComandaDialog,
     },
     setup() {
-        const commonStore = useCommonStore();
-        const comandaStore = useComandaStore();
-        const checkDialog = toRef(commonStore,"showNewComandaDialog");
-        const comandas = toRef(comandaStore,"comandas");
-        const router = useRouter();
+        const authStore         = useAuthStore();
+        const commonStore       = useCommonStore();
+        const comandaStore      = useComandaStore();
+        const userMasterData    = toRef(authStore, "userMasterData");
+        const checkDialog       = toRef(commonStore, "showNewComandaDialog");
+        const comandas          = toRef(comandaStore,"comandas");
+        const router            = useRouter();
 
         const closeDialog = () => {
             commonStore.setShowNewComandaDialog(false);
         };
 
         const fetchComandas = async () => {
-            if (commonStore.getUserLocal && commonStore.getUserLocal.length > 0) {
-                await comandaStore.fetchComandas(commonStore.getUserLocal[0].id);
-            }
+            await comandaStore.fetchComandas(userMasterData.value.id_master);
+            console.log('[FETCH] Comandas toRef: ', comandas.value)
         };
 
         onMounted(fetchComandas);
@@ -61,7 +63,7 @@ export default {
             router.push({ name: 'ComandaDetail', params: { id: comandaId } });
         };
 
-        return { checkDialog, closeDialog, comandas, selectComanda, formatCurrency, fetchComandas, showNewComandaDialog: false, };
+        return { userMasterData, checkDialog, closeDialog, comandas, selectComanda, formatCurrency, fetchComandas, showNewComandaDialog: false, };
     },
 };
 </script>

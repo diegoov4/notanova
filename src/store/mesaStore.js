@@ -13,16 +13,16 @@ export const useMesaStore = defineStore('mesa', {
         /* ************* */
         /*      GET      */
         /* ************* */
-        async fetchMesas(id_local) {
-            if (!id_local) {
-                console.error('id_local is not provided or is null');
-                throw new Error('Local ID is required');
+        async fetchMesas(id_master) {
+            if (!id_master) {
+                console.error('id_master is not provided or is null');
+                throw new Error('Master ID is required');
             }
 
             const { data, error } = await supabase
                 .from('mesas')
                 .select('*')
-                .eq('id_local', id_local);
+                .eq('id_master', id_master);
 
             if (error) console.error('Error al cargar las mesas:', error);
             else {
@@ -34,15 +34,15 @@ export const useMesaStore = defineStore('mesa', {
         /* ************* */
         /*      POST     */
         /* ************* */
-        async createMesa(nombreMesa, id_local) {
-            if (!id_local) {
-                console.error('id_local is not provided or is null');
-                throw new Error('Local ID is required');
+        async createMesa(nombreMesa, id_master) {
+            if (!id_master) {
+                console.error('id_master is not provided or is null');
+                throw new Error('Master ID is required');
             }
 
             const {error } = await supabase
                 .from('mesas')
-                .insert([{ nombre_mesa: nombreMesa, id_local: id_local }]);
+                .insert([{ nombre: nombreMesa, id_master: id_master }]);
 
             if (error) {
                 console.error('Error al crear la mesa[STORE]:', error);
@@ -55,10 +55,10 @@ export const useMesaStore = defineStore('mesa', {
         /* ************* */
         /*      PUT      */
         /* ************* */
-        async updateMesa(nombreMesa, id_local) {
-            if (!id_local) {
-                console.error('id_local is not provided or is null');
-                throw new Error('Local ID is required');
+        async updateMesa(nombreMesa, id_master) {
+            if (!id_master) {
+                console.error('id_master is not provided or is null');
+                throw new Error('Master ID is required');
             }
             //TO-DO
         },

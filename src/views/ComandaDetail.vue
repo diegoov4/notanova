@@ -3,7 +3,7 @@
 
         <!-- Cabecera Comanda -->
         <header class="comanda-header">
-            <h2 class="comanda-title">{{ comanda?.clientes.nombre_cliente || 'Cliente Desconocido' }}</h2>
+            <h2 class="comanda-title">{{ comanda?.clientes.nombre || 'Cliente Desconocido' }}</h2>
             <p class="comanda-total">Total:
                 <span  @click="cerrarComanda" class="comanda-total-price">{{ formatCurrency(comanda?.total) || '0 €' }}</span>
             </p>
@@ -70,6 +70,15 @@ export default {
         const route = useRoute();
         const showProductSelection = ref(false);
 
+        const fetchComandaById = async () => {
+            if (route.params.id) {
+                await comandaStore.fetchComandaById(route.params.id);
+            } else {
+                console.error('Invalid Param ID: ', route.params.id);
+            }
+        };
+        onMounted(fetchComandaById);
+
         const increment = async (producto) => {
             producto.cantidad++;
             await comandaStore.updateProductQuantity(comanda.value.id, producto.producto.id, producto.cantidad);
@@ -114,15 +123,6 @@ export default {
             console.log('Lista Productos a Actualizar: ', comanda.value.comandas_productos);
             comandaStore.updateProductsComanda(comanda.value.id, comanda.value.comandas_productos);
         };
-
-        const fetchComandaById = async () => {
-            if (route.params.id) {
-                await comandaStore.fetchComandaById(route.params.id);
-            } else {
-                console.error('Invalid Param ID: ', route.params.id);
-            }
-        };
-        onMounted(fetchComandaById);
 
         const formatCurrency = (value) => {
             if (value) {
@@ -200,29 +200,6 @@ export default {
     font-size: 1.2rem;
 }
 
-.pedido-section {
-    margin-bottom: 1rem;
-}
-
-.pedido-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.pedido-item {
-    display: flex;
-    align-items: center;
-    margin: 1rem 0 1rem 0;
-    background: #f9f9f9;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.pedido-item .button-red{
-    padding: 10px 18px;
-}
-
 .product-image-container {
     flex-shrink: 0;
 }
@@ -243,20 +220,6 @@ export default {
     font-weight: bold;
     margin-bottom: 0.25rem;
 }
-
-.quantity-controls {
-    display: flex;
-    align-items: center;
-}
-
-.quantity-btn {
-    border: none;
-    background: #e0e0e0;
-    padding: 0.25rem 0.5rem;
-    margin: 0;
-    cursor: pointer;
-}
-
 
 .comanda-footer {
     display: flex;

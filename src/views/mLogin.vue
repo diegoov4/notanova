@@ -19,19 +19,17 @@
 <script>
 import { ref } from 'vue';
 import { useAuthStore } from '@/store/authStore';
-import { useCommonStore } from '@/store/commonStore';
 import { supabase } from '@/services/supabase';
 import { useRouter } from 'vue-router';
 
 export default {
   name: 'mLogin',
   setup() {
-    const router = useRouter()
+    const router    = useRouter()
     const authStore = useAuthStore();
-    const commonStore = useCommonStore();
-    const email = ref('');
-    const password = ref('');
-    const error = ref('');
+    const email     = ref('');
+    const password  = ref('');
+    const error     = ref('');
 
     const handleLogin = async () => {
       const { data: { user }, error: loginError } = await supabase.auth.signInWithPassword({
@@ -40,16 +38,16 @@ export default {
       });
 
       if (loginError) {
-        // error.value = loginError.message;
+        console.log('[LOGIN] Error: ', loginError.message)
         error.value = "Error de credenciales";
       } else {
-        authStore.setUser(user);
-        console.log('AUTH_USER:', user);
-
-        await commonStore.fetchLocalByEmail(user.email);
-
-        //Redirigimos al inicio
-        router.push({ name: 'LandingHome' });
+        //Persist auth_user by 'local'
+        const isFetch = await authStore.fetchUserMasterData(user.email);
+        if(isFetch){
+          authStore.setUser(user);
+          //Redirigimos al inicio
+          router.push({ name: 'LandingHome' });
+        }
       }
     };
 

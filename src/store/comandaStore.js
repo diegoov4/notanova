@@ -14,12 +14,12 @@ export const useComandaStore = defineStore('comanda', {
         /* ************* */
         /*      GET      */
         /* ************* */
-        async fetchComandas(id_local) {
+        async fetchComandas(id_master) {
             this.comandas = null;
 
-            if (!id_local) {
-                console.error('id_local is not provided or is null');
-                throw new Error('Local ID is required');
+            if (!id_master) {
+                console.error('id_master is not provided or is null');
+                throw new Error('Master ID is required');
             }
 
             const { data, error } = await supabase
@@ -27,22 +27,22 @@ export const useComandaStore = defineStore('comanda', {
                 .select(`
                     *,
                     clientes (
-                        nombre_cliente
+                        nombre
                     ),
                     mesas (
-                        nombre_mesa
+                        nombre
                     ),
                     comandas_productos (
                         cantidad,
                         productos (*)
                     )
                     `)
-                .eq('id_local', id_local)
+                .eq('id_master', id_master)
                 .eq('status', 'open')
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('Error al obtener comandas:', error);
+                console.error('[STORE]Error al obtener comandas:', error);
             } else {
                 this.comandas = data.map(comanda => {
 
@@ -76,10 +76,10 @@ export const useComandaStore = defineStore('comanda', {
                 .select(`
                         *,
                         clientes (
-                            nombre_cliente
+                            nombre
                         ),
                         mesas (
-                            nombre_mesa
+                            nombre
                         ),
                         comandas_productos (
                             cantidad,
@@ -89,7 +89,6 @@ export const useComandaStore = defineStore('comanda', {
                 .eq('id', id_comanda)
                 .eq('status', 'open')
                 .single();
-            // console.log('[STORE]COMANDAByID DETAIL: ', data);
 
             if (error) {
                 console.error('[STORE]Error al obtener los detalles de la comanda:', error);
@@ -112,7 +111,7 @@ export const useComandaStore = defineStore('comanda', {
                     total,
                 };
             } else {
-                console.error('La respuesta no tiene la forma esperada o no contiene productos.');
+                console.error('[STORE]La respuesta no tiene la forma esperada o no contiene productos.');
             }
         },
 
@@ -120,10 +119,10 @@ export const useComandaStore = defineStore('comanda', {
         /* ************* */
         /*      POST     */
         /* ************* */
-        async createComanda(cliente, productosSeleccionados, id_local) {
-            if (!id_local) {
-                console.error('[STORE]id_local is not provided or is null');
-                throw new Error('Local ID is required');
+        async createComanda(cliente, productosSeleccionados, id_master) {
+            if (!id_master) {
+                console.error('[STORE]id_master is not provided or is null');
+                throw new Error('Master ID is required');
             }
 
             try {
@@ -132,7 +131,7 @@ export const useComandaStore = defineStore('comanda', {
                     .insert([{
                         id_cliente: cliente.id,
                         id_mesa: 1,
-                        id_local: id_local,
+                        id_master: id_master,
                         status: 'open',
                     }])
                     .select();
@@ -158,7 +157,7 @@ export const useComandaStore = defineStore('comanda', {
 
                 if (productError) throw productError;
             } catch (err) {
-                console.error('Error al guardar la comanda[STORE]:', err);
+                console.error('[STORE]Error al guardar la comanda:', err);
                 throw err;
             }
         },
@@ -166,10 +165,10 @@ export const useComandaStore = defineStore('comanda', {
         /* ************* */
         /*      PUT      */
         /* ************* */
-        async updateComanda(comanda, id_local) {
-            if (!id_local) {
-                console.error('id_local is not provided or is null');
-                throw new Error('Local ID is required');
+        async updateComanda(comanda, id_master) {
+            if (!id_master) {
+                console.error('id_master is not provided or is null');
+                throw new Error('Master ID is required');
             }
             //TO-DO
         },

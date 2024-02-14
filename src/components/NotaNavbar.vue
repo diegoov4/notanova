@@ -10,8 +10,8 @@
       <router-link to="/mesas" class="navbar-item">Mesas</router-link>
     </div>
     <div class="navbar-end">
-      <span class="navbar-item">{{ user?.email }}</span> <!-- Mostrar el email del usuario autenticado -->
-      <img src="@/assets/logout_w.png" @click="logout" class="logout-button" alt="NotaNova Logo" />
+      <span class="navbar-item">{{ auth_user?.email }}</span>
+      <i class="fa-solid fa-arrow-right-from-bracket logout-button" @click="logout"></i>
     </div>
   </nav>
 </template>
@@ -30,7 +30,7 @@ export default {
     const router = useRouter();
 
     const openDialog = () => {
-      router.push({ name: 'LandingHome' });
+      goToLandingHome()
       commonStore.setShowNewComandaDialog(true);
     };
     
@@ -46,7 +46,7 @@ export default {
     }
 
     return {
-      user: authStore.user,
+      auth_user: authStore.auth_user,
       openDialog,
       goToLandingHome,
       logout,
@@ -99,16 +99,16 @@ export default {
   cursor: pointer;
   font-size: 1.5rem;
   margin-left: 1rem;
-  color: #019365;
+  color: #410000;
   height: 25px;
 }
 
 .logout-button:hover {
-  color: #be8745; /* Cambiar color al hacer hover */
+  color: #da2911;
 }
 
 /* Estilo para los íconos si usas FontAwesome o similar */
 .icon {
-  transition: color 0.3s ease; /* Transición suave para el color */
+  transition: color 0.3s ease;
 }
 </style>  

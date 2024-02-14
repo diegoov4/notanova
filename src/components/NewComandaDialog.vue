@@ -3,24 +3,31 @@
     <div class="dialog">
       <header class="dialog-header">
         <h3>Nueva Comanda</h3>
-        <button class="close-button" @click="resetDialog">x</button>
+        <button class="close-button" @click="resetDialog">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </header>
       <div class="dialog-body">
 
         <!-- Selector de cliente -->
         <div class="select-wrapper-client">
           <div class="select-display" @click="toggleDropdown">
-            {{ selectedCliente?.nombre_cliente || 'Cliente' }}
-            <span class="caret">&#9660;</span>
+            {{ selectedCliente?.nombre || 'Cliente' }}
+            <i class="fa-solid fa-caret-down caret"></i>
           </div>
           <ul v-if="showDropdown" class="dropdown">
-            <li v-for="cliente in clientes" :key="cliente.id" @click="selectCliente(cliente)">
-              {{ cliente.nombre_cliente }}
+            <li v-if="clientes.length === 0" @click="selectCliente('Cliente')">[Sin clientes]</li>
+            <li v-else v-for="cliente in clientes" :key="cliente.id" @click="selectCliente(cliente)">
+              {{ cliente.nombre }}
             </li>
           </ul>
-          <button @click="showCreateClientDialog = true">+</button>
+
+          <button @click="showCreateClientDialog = true">
+            <i class="fa-solid fa-plus fa-xs"></i>
+          </button>
         </div>
-        <CreateClientDialog v-if="showCreateClientDialog" @close="showCreateClientDialog = false" @clientCreated="fetchClients" />
+        <CreateClientDialog v-if="showCreateClientDialog" @close="showCreateClientDialog = false"
+          @clientCreated="fetchClients" />
 
         <!-- Lista de productos seleccionados -->
         <div class="selected-products">
@@ -32,7 +39,9 @@
               <div class="product-title">{{ producto.titulo }}</div>
               <div class="product-controls">
                 <input type="number" min="0" v-model="producto.cantidad" class="product-quantity" />
-                <button @click="removeProduct(producto)" class="remove-product-button"></button>
+                <button @click="removeProduct(producto)" class="remove-product-button">
+                  <i class="fas fa-trash-alt fa-xs"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -54,6 +63,7 @@
   
 <script>
 import { ref, onMounted, toRef } from 'vue';
+import { useAuthStore } from '@/store/authStore';
 import { useCommonStore } from '@/store/commonStore';
 import { useClientStore } from '@/store/clienteStore';
 import { useComandaStore } from '@/store/comandaStore';
@@ -66,21 +76,21 @@ export default {
     ProductSelectionDialog
   },
   setup(_, { emit }) {
-    const commonStore = useCommonStore();
-    const clientStore = useClientStore();
-    const comandaStore = useComandaStore();
-    const clientes = toRef(clientStore,'clientes');
-    const selectedCliente = ref(null);
-    const showCreateClientDialog = ref(false);
-    const showDropdown = ref(false);
-    const productosSeleccionados = ref([]);
-    const showProductSelection = ref(false);
-    const error = ref('');
+    const authStore       = useAuthStore();
+    const commonStore     = useCommonStore();
+    const clientStore     = useClientStore();
+    const comandaStore    = useComandaStore();
+    const userMasterData  = toRef(authStore, "userMasterData");
+    const clientes        = toRef(clientStore, 'clientes');
+    const master_id       = userMasterData.value.id;
+    const selectedCliente         = ref(null);
+    const showCreateClientDialog  = ref(false);
+    const showDropdown            = ref(false);
+    const productosSeleccionados  = ref([]);
+    const showProductSelection    = ref(false);
 
     const fetchClients = async () => {
-      if (commonStore.getUserLocal && commonStore.getUserLocal.length > 0) {
-        await clientStore.fetchClients(commonStore.getUserLocal[0].id);
-      }
+      await clientStore.fetchClients(master_id);
     };
     onMounted(fetchClients);
 
@@ -103,19 +113,17 @@ export default {
     };
 
     const saveComanda = async () => {
-      error.value = '';
 
-      //DMO: Quitar el tener un producto minimo, se podrán crear vacías
-      if (!selectedCliente.value || productosSeleccionados.value.length === 0) {
-        error.value = 'Por favor, seleccione un cliente y al menos un producto.';
-        alert(error.value);
+      //DMO: remove at least 1 product
+      if (!selectedCliente.value) { //|| productosSeleccionados.value.length === 0
+        alert('Por favor, seleccione al menos un cliente');
         return;
       }
 
       // Create Comanda
       try {
-        if (commonStore.getUserLocal && commonStore.getUserLocal.length > 0) {
-          await comandaStore.createComanda(selectedCliente.value, productosSeleccionados.value, commonStore.getUserLocal[0].id);
+        if (master_id) {
+          await comandaStore.createComanda(selectedCliente.value, productosSeleccionados.value, master_id);
 
           emit('comanda-saved');
           resetDialog();
@@ -147,7 +155,6 @@ export default {
       fetchClients,
       productosSeleccionados,
       showProductSelection,
-      error,
       showProducts,
       removeProduct,
       saveComanda,
@@ -188,7 +195,6 @@ export default {
 
 .product-info {
   flex: 1;
-  /* Toma el espacio restante */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -197,7 +203,6 @@ export default {
 .product-title {
   font-weight: bold;
   margin-bottom: 5px;
-  /* Espacio entre el título y los controles */
 }
 
 .product-controls {
@@ -213,9 +218,6 @@ export default {
 }
 
 .remove-product-button:before {
-  content: '✕';
-  /* Puedes usar un icono de X aquí */
-  color: red;
   font-weight: bold;
   font-size: 1.2rem;
 }

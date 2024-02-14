@@ -13,16 +13,16 @@ export const useClientStore = defineStore('cliente', {
         /* ************* */
         /*      GET      */
         /* ************* */
-        async fetchClients(id_local) {
-            if (!id_local) {
-                console.error('id_local is not provided or is null');
-                throw new Error('Local ID is required');
+        async fetchClients(id_master) {
+            if (!id_master) {
+                console.error('id_master is not provided or is null');
+                throw new Error('Master ID is required');
             }
 
             const { data, error } = await supabase
                 .from('clientes')
                 .select('*')
-                .eq('id_local', id_local)
+                .eq('id_master', id_master)
                 .order('id', { ascending: false });
 
             if (error) console.error('Error al cargar clientes:', error);
@@ -35,10 +35,10 @@ export const useClientStore = defineStore('cliente', {
         /* ************* */
         /*      POST     */
         /* ************* */
-        async createClient(clientName, id_local) {
-            if (!id_local) {
-                console.error('id_local is not provided or is null');
-                throw new Error('Local ID is required');
+        async createClient(clientName, id_master) {
+            if (!id_master) {
+                console.error('id_master is not provided or is null');
+                throw new Error('Master ID is required');
             }
 
             if (!clientName) throw new Error('No Client Name');
@@ -48,10 +48,10 @@ export const useClientStore = defineStore('cliente', {
 
             const {error } = await supabase
                 .from('clientes')
-                .insert([{ nombre_cliente: capitalizeClientName, id_local: id_local }]);
+                .insert([{ nombre: capitalizeClientName, id_master: id_master }]);
 
             if (error) {
-                console.error('Error al crear cliente[STORE]:', error);
+                console.error('[STORE]Error al crear cliente:', error);
                 throw error;
             } else {
                 console.log('[STORE]CLIENTE: ', capitalizeClientName, ' CREADO');
@@ -61,10 +61,10 @@ export const useClientStore = defineStore('cliente', {
         /* ************* */
         /*      PUT      */
         /* ************* */
-        async updateClient(client, id_local) {
-            if (!id_local) {
-                console.error('id_local is not provided or is null');
-                throw new Error('Local ID is required');
+        async updateClient(client, id_master) {
+            if (!id_master) {
+                console.error('id_master is not provided or is null');
+                throw new Error('Master ID is required');
             }
             //TO-DO
         },
