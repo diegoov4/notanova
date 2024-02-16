@@ -5,7 +5,8 @@
         <header class="comanda-header">
             <h2 class="comanda-title">{{ comanda?.clientes.nombre || 'Cliente Desconocido' }}</h2>
             <p class="comanda-total">Total:
-                <span  @click="cerrarComanda" class="comanda-total-price">{{ formatCurrency(comanda?.total) || '0 €' }}</span>
+                <span @click="cerrarComanda" class="comanda-total-price">{{ formatCurrency(comanda?.total) || '0 €'
+                }}</span>
             </p>
         </header>
 
@@ -14,15 +15,11 @@
             <ul class="pedido-list">
                 <li v-for="producto_b in comanda?.comandas_productos" :key="producto_b.id" class="pedido-item">
                     <div class="product-image-container">
-                        <img :src="producto_b.producto.imagen" class="product-image" :alt="producto_b.producto.titulo" />
+                        <img :src="producto_b.producto.images.url" class="product-image"
+                            :alt="producto_b.producto.titulo" />
                     </div>
                     <div class="pedido-info">
                         <span class="pedido-nombre">{{ producto_b.producto.titulo }}</span>
-                        <!-- <div class="quantity-controls">
-                            <button @click="decrement(producto_b)" class="quantity-btn">-</button>
-                            <input v-model.number="producto_b.cantidad" min="0" readonly>
-                            <button @click="increment(producto_b)" class="quantity-btn">+</button>
-                        </div> -->
                         <div class="number-input">
                             <button @click="decrement(producto_b)">-</button>
                             <input v-model.number="producto_b.cantidad" min="0" type="number">
@@ -33,10 +30,10 @@
                 </li>
             </ul>
         </section>
-        
+
         <!-- Dialogo Selección Productos -->
         <div class="product-dialog-container" v-if="showProductSelection">
-            <ProductSelectionDialog @selectedProducts="showProducts" @close="showProductSelection = false" />
+            <ProductSelectionDialog :options-list="optionsList" @selectedProducts="showProducts" @close="showProductSelection = false" />
         </div>
 
         <!-- Footer. Editar comanda y Cerrar (pagar) -->
@@ -45,8 +42,6 @@
                 <button @click="showProductSelection = true" class="button button-yellow">Productos</button>
                 <button @click="updateComanda" class="button button-green">Guardar</button>
             </div>
-            <!-- DMO: CAmbiar y poner como icono en la cabecera en pequeño a la dcha -->
-            <!-- <button @click="cerrarComanda" class="button button-green">PAGAR</button> -->
             <button @click="goToLandingHome" class="button button-salir">Salir</button>
         </footer>
     </div>
@@ -54,9 +49,11 @@
 
 <script>
 import { ref, onMounted, toRef } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useComandaStore } from '@/store/comandaStore';
-import ProductSelectionDialog from '@/components/ProductSelectionDialog.vue';
+import { useRouter, useRoute }  from 'vue-router';
+import { useAuthStore }         from '@/store/authStore';
+import { useComandaStore }      from '@/store/comandaStore';
+import { useProductoStore }     from '@/store/productoStore';
+import ProductSelectionDialog   from '@/components/ProductSelectionDialog.vue';
 
 export default {
     name: 'ComandaDetail',
@@ -64,20 +61,39 @@ export default {
         ProductSelectionDialog
     },
     setup() {
-        const comandaStore = useComandaStore();
-        const comanda = toRef(comandaStore, "comanda");
-        const router = useRouter();
-        const route = useRoute();
+        const router            = useRouter();
+        const route             = useRoute();
+        const authStore         = useAuthStore();
+        const comandaStore      = useComandaStore();
+        const productStore      = useProductoStore();
+        const userMasterData    = toRef(authStore, "userMasterData");
+        const productTypes      = toRef(productStore, "product_types");
+        const comanda           = toRef(comandaStore, "comanda");
+        const master_id         = userMasterData.value.id;
         const showProductSelection = ref(false);
+        const optionsList       = ref([]);
 
         const fetchComandaById = async () => {
             if (route.params.id) {
+                // Get Comanda data
                 await comandaStore.fetchComandaById(route.params.id);
+                console.log('[COMANDA] ', comanda);
             } else {
                 console.error('Invalid Param ID: ', route.params.id);
             }
         };
-        onMounted(fetchComandaById);
+        const fetchProductos = async () => {
+            await productStore.fetchProductos(master_id);
+
+            optionsList.value = productTypes.value.map(type => ({
+                value: type.id,
+                description: `${type.categoria} > ${type.subcategoria}`
+            }));
+        };
+        onMounted(() => {
+            fetchComandaById();
+            fetchProductos();
+        });
 
         const increment = async (producto) => {
             producto.cantidad++;
@@ -160,7 +176,7 @@ export default {
             await comandaStore.deleteProducto(comanda.value.id, producto.id);
         };
 
-        return { comanda, cerrarComanda, showProductSelection, goToLandingHome, showProducts, eliminarProducto, increment, decrement, formatCurrency };
+        return { comanda, cerrarComanda, optionsList, productTypes, showProductSelection, goToLandingHome, showProducts, eliminarProducto, increment, decrement, formatCurrency };
     },
 };
 </script>
@@ -194,7 +210,7 @@ export default {
     color: #333;
 }
 
-.comanda-total .comanda-total-price{
+.comanda-total .comanda-total-price {
     cursor: pointer;
     font-weight: bold;
     font-size: 1.2rem;
@@ -226,12 +242,12 @@ export default {
     justify-content: space-between;
     margin-top: 2rem;
 }
+
 /* Expandimos los botones por todo el footer */
 /* .comanda-footer button {
     flex-grow: 1;
     margin: 0 5px;
 } */
-.comanda-footer .edit-buttons button{
+.comanda-footer .edit-buttons button {
     margin: 0 12px 0 0;
-}
-</style>
+}</style>

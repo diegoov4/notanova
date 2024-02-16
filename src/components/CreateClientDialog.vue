@@ -38,9 +38,10 @@ export default {
             //Create Client
             try {
                 if (master_id) {
-                    await clientStore.createClient(newClientName.value, master_id);
+                    let clientCreated = await clientStore.createClient(newClientName.value, master_id);
                     newClientName.value = '';
-                    emit('clientCreated');
+                    
+                    emit('clientCreated', clientCreated);
                     close();
                 }
             } catch (error) {

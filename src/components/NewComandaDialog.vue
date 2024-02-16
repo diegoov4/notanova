@@ -26,14 +26,13 @@
             <i class="fa-solid fa-plus fa-xs"></i>
           </button>
         </div>
-        <CreateClientDialog v-if="showCreateClientDialog" @close="showCreateClientDialog = false"
-          @clientCreated="fetchClients" />
+        <CreateClientDialog v-if="showCreateClientDialog" @close="showCreateClientDialog = false" @clientCreated="clientCreated" />
 
         <!-- Lista de productos seleccionados -->
         <div class="selected-products">
           <div v-for="producto in productosSeleccionados" :key="producto.id" class="selected-product">
             <div class="product-image-container">
-              <img :src="producto.imagen" :alt="producto.titulo" class="product-image" />
+              <img :src="producto.images.url" :alt="producto.titulo" class="product-image" />
             </div>
             <div class="product-info">
               <div class="product-title">{{ producto.titulo }}</div>
@@ -51,7 +50,7 @@
 
         <!-- Dialog para selección de productos -->
         <div class="product-dialog-container" v-if="showProductSelection">
-          <ProductSelectionDialog @selectedProducts="showProducts" @close="showProductSelection = false" />
+          <ProductSelectionDialog :options-list="optionsList" @selectedProducts="showProducts" @close="showProductSelection = false" />
         </div>
       </div>
       <footer class="dialog-footer">
@@ -62,13 +61,14 @@
 </template>
   
 <script>
-import { ref, onMounted, toRef } from 'vue';
-import { useAuthStore } from '@/store/authStore';
-import { useCommonStore } from '@/store/commonStore';
-import { useClientStore } from '@/store/clienteStore';
-import { useComandaStore } from '@/store/comandaStore';
-import CreateClientDialog from '@/components/CreateClientDialog.vue';
-import ProductSelectionDialog from '@/components/ProductSelectionDialog.vue';
+import { ref, onMounted, toRef }  from 'vue';
+import { useAuthStore }           from '@/store/authStore';
+import { useCommonStore }         from '@/store/commonStore';
+import { useClientStore }         from '@/store/clienteStore';
+import { useComandaStore }        from '@/store/comandaStore';
+import { useProductoStore }       from '@/store/productoStore';
+import CreateClientDialog         from '@/components/CreateClientDialog.vue';
+import ProductSelectionDialog     from '@/components/ProductSelectionDialog.vue';
 
 export default {
   components: {
@@ -80,19 +80,39 @@ export default {
     const commonStore     = useCommonStore();
     const clientStore     = useClientStore();
     const comandaStore    = useComandaStore();
+    const productStore    = useProductoStore();
     const userMasterData  = toRef(authStore, "userMasterData");
     const clientes        = toRef(clientStore, 'clientes');
+    const productTypes    = toRef(productStore, "product_types");
     const master_id       = userMasterData.value.id;
+    const created_by      = userMasterData.value.responsable;
     const selectedCliente         = ref(null);
     const showCreateClientDialog  = ref(false);
     const showDropdown            = ref(false);
     const productosSeleccionados  = ref([]);
     const showProductSelection    = ref(false);
+    const optionsList             = ref([]);
 
     const fetchClients = async () => {
       await clientStore.fetchClients(master_id);
     };
-    onMounted(fetchClients);
+    const fetchProductos = async () => {
+        await productStore.fetchProductos(master_id);
+
+        optionsList.value = productTypes.value.map(type => ({
+            value: type.id,
+            description: `${type.categoria} > ${type.subcategoria}`
+        }));
+    };
+    onMounted(() => {
+      fetchClients();
+      fetchProductos();
+    });
+
+    const clientCreated = (cliente) => {
+      selectedCliente.value = cliente;
+      fetchClients();
+    }
 
     const selectCliente = (cliente) => {
       selectedCliente.value = cliente;
@@ -123,7 +143,7 @@ export default {
       // Create Comanda
       try {
         if (master_id) {
-          await comandaStore.createComanda(selectedCliente.value, productosSeleccionados.value, master_id);
+          await comandaStore.createComanda(selectedCliente.value, productosSeleccionados.value, created_by, master_id);
 
           emit('comanda-saved');
           resetDialog();
@@ -149,9 +169,11 @@ export default {
       clientes,
       selectedCliente,
       showCreateClientDialog,
+      optionsList,
       toggleDropdown,
       showDropdown,
       selectCliente,
+      clientCreated,
       fetchClients,
       productosSeleccionados,
       showProductSelection,

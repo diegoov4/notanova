@@ -34,7 +34,12 @@ export const useComandaStore = defineStore('comanda', {
                     ),
                     comandas_productos (
                         cantidad,
-                        productos (*)
+                        productos (
+                            *,
+                            images (
+                                url
+                            )
+                        )
                     )
                     `)
                 .eq('id_master', id_master)
@@ -83,7 +88,12 @@ export const useComandaStore = defineStore('comanda', {
                         ),
                         comandas_productos (
                             cantidad,
-                            productos(*)
+                            productos (
+                                *,
+                                images (
+                                    url
+                                )
+                            )
                         )
                     `)
                 .eq('id', id_comanda)
@@ -119,7 +129,7 @@ export const useComandaStore = defineStore('comanda', {
         /* ************* */
         /*      POST     */
         /* ************* */
-        async createComanda(cliente, productosSeleccionados, id_master) {
+        async createComanda(cliente, productosSeleccionados, created_by, id_master) {
             if (!id_master) {
                 console.error('[STORE]id_master is not provided or is null');
                 throw new Error('Master ID is required');
@@ -129,9 +139,12 @@ export const useComandaStore = defineStore('comanda', {
                 const { data: comanda, error: comandaError } = await supabase
                     .from('comandas')
                     .insert([{
-                        id_cliente: cliente.id,
-                        id_mesa: 1,
                         id_master: id_master,
+                        id_cliente: cliente.id,
+                        id_mesa: 1,     //DMO: Cambiar a {Mesa}
+                        // created_at   //Se añade solo con timestamp
+                        created_by: created_by,
+                        // closed_at    //NULL por defecto hasta que se cierre
                         status: 'open',
                     }])
                     .select();

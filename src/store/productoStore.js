@@ -23,35 +23,52 @@ export const useProductoStore = defineStore('producto', {
                 throw new Error('Master ID is required');
             }
 
-            const { data, error } = await supabase
-                .from('productos')
-                .select(`
-                  *,
-                  images (
-                    url
-                  )
-                `)
-                .eq('id_master', id_master);
-
-            if (error) {
-                console.error('[STORE]Error al cargar los productos:', error);
-            } else {
-                this.productos = data;
-            }
-        },
-
-        async fetchProductTypes() {
-            const { data, error } = await supabase
+            // Get Product Types (Lo necesitamos en todos los productos para filtrar)
+            const { data: productTypesData, error: productTypesError } = await supabase
                 .from('product_types')
                 .select('*')
                 .order('id', { ascending: true });
 
-            if (error) {
-                console.error('[STORE]Error al cargar los Tipos de Productos:', error);
+            if (productTypesError) {
+                console.error('[STORE]Error al cargar los Tipos de Productos:', productTypesError);
             } else {
-                this.product_types = data;
+                console.log['[STORE] Tipo Productos', productTypesData];
+
+                // Get Products (all including images & types)
+                const { data: productsData, error: productsError } = await supabase
+                    .from('productos')
+                    .select(`
+                            *,
+                            images (
+                                url,
+                                product_types (
+                                    id,
+                                    categoria,
+                                    subcategoria
+                                )
+                            )
+                    `)
+                    .eq('id_master', id_master);
+
+                if (productsError) {
+                    console.error('[STORE]Error al cargar los productos:', productsError);
+                } else {
+                    // NO LLEGA AQUI
+                    console.log['[STORE] productos', productsData];
+                    // Inicializa la cantidad para cada producto aquí
+                    const productosConCantidad = productsData.map(product => ({
+                        ...product,
+                        cantidad: 0
+                    }));
+                    this.product_types  = productTypesData;
+                    this.productos      = productosConCantidad;
+                }
             }
         },
+
+        // async fetchProductTypes() {
+            
+        // },
 
         async fetchImages() {
             const { data, error } = await supabase

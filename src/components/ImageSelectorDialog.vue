@@ -1,13 +1,9 @@
 <template>
     <div class="dialog-overlay" @click.self="close">
         <div class="dialog">
+            <!-- Type Filter -->
             <div class="filter-container">
-                <select v-model="selectedType" class="type-filter">
-                    <option value="">Todos los tipos</option>
-                    <option v-for="tp in ProductTypes" :key="tp.id" :value="tp.id">
-                        {{ tp.categoria }} > {{ tp.subcategoria }}
-                    </option>
-                </select>
+                <v-select class="type-filter" :options="optionsList" v-model="selectedType" label="description" placeholder="Tipo de producto" />
             </div>
             <ul class="products-picker image-list">
                 <li class="product-item" v-for="image in filteredImages" :key="image.id" @click="selectImage(image)">
@@ -31,10 +27,13 @@ import { useProductoStore } from '@/store/productoStore';
 
 
 export default {
+    props: {
+        optionsList: Array
+    },
     setup(_, { emit }) {
         const productosStore = useProductoStore();
         const images         = toRef(productosStore, "images");
-        const ProductTypes   = toRef(productosStore, "product_types");
+        const productTypes   = toRef(productosStore, "product_types");
         const selectedType   = ref('');
 
         const selectImage = (image) => {
@@ -43,9 +42,8 @@ export default {
         }
 
         const fetchImages = async () => {
-            await productosStore.fetchProductTypes();
             await productosStore.fetchImages();
-            console.log('[fetchTypes] ', ProductTypes, '[fetchImages] ',images);
+            console.log('[fetchTypes] ', productTypes, '[fetchImages] ',images);
         };
 
         onMounted(fetchImages);
@@ -56,7 +54,7 @@ export default {
         const filteredImages = computed(() => {
             let filterImg = images.value;
             if (selectedType.value) {
-                filterImg = images.value.filter(image => image.product_types && image.product_types.id === selectedType.value);
+                filterImg = images.value.filter(image => image.product_types && image.product_types.id === selectedType.value.value);
             }
             return filterImg;
         });
@@ -65,7 +63,7 @@ export default {
             images,
             filteredImages,
             selectedType,
-            ProductTypes,
+            productTypes,
             selectImage,
             close
         };
@@ -79,46 +77,5 @@ export default {
 .image-list .product-item {
     border-bottom: 1px solid #d3d3d3;
 }
-
-.filter-container {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: center;
-}
-
-.type-filter {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  font-size: 1rem;
-  color: #333;
-  cursor: pointer;
-}
-
-.type-filter:focus {
-  outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
-
-.type-filter option {
-  padding: 0.5rem;
-  background: #fff;
-  color: #333;
-}
-
-.filter-container:hover .type-filter {
-  border-color: #4CAF50;
-}
-
-/* Media query para ajustar el tamaño en dispositivos más pequeños si es necesario */
-@media (max-width: 768px) {
-  .type-filter {
-    width: 100%;
-  }
-}
-
 </style>
   

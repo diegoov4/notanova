@@ -233,9 +233,12 @@ input[type=number]::-webkit-outer-spin-button {
   align-items: center;
   flex-direction: column;
   padding: 2rem;
-  background: url('@/assets/bg-main-image.png') no-repeat center center;
+  background: url('@/assets/bg-main-image.png') no-repeat center center fixed;
   background-size: cover;
   opacity: 0.8;
+  min-height: 100vh;
+  height: 100vh;
+  
 }
 
 .with-navbar {
@@ -333,9 +336,7 @@ input[type=number]::-webkit-outer-spin-button {
   margin-bottom: 2rem;
   text-align: center;
   font-size: 2em;
-  /* Tamaño de fuente para el título */
   color: #fff;
-  /* Color blanco para el título, puedes ajustar según tu diseño */
 }
 
 .comandas-list {
@@ -446,7 +447,7 @@ input[type=number]::-webkit-outer-spin-button {
   width: 65px;
   height: 65px;
   border-radius: 4px;
-  margin-right: 1rem;
+  /* margin-right: 1rem; DMO:BORRAR? */
   object-fit: cover;
 }
 
@@ -566,6 +567,91 @@ span.price{
 }
 
 /* *************************** */
+/*           CAROUSEL          */
+/* *************************** */
+.activeClasses {
+  margin-top: 4rem;
+  .carousel__item p{
+    color: #fdda00;
+    font-weight: bold;
+  }
+  .carousel__slide {
+    padding: 5;
+  }
+
+  .carousel__viewport {
+    perspective: 2000px;
+  }
+
+  .carousel__track {
+    transform-style: preserve-3d;
+  }
+
+  .carousel__slide--sliding {
+    transition: 0.5s;
+  }
+
+  .carousel__slide {
+    opacity: 0.9;
+    transform: rotateY(-20deg) scale(0.9);
+  }
+
+  .carousel__slide--active~.carousel__slide {
+    transform: rotateY(20deg) scale(0.9);
+  }
+
+  .carousel__slide--prev {
+    opacity: 1;
+    transform: rotateY(-10deg) scale(0.95);
+  }
+
+  .carousel__slide.carousel__slide--next {
+    opacity: 1;
+    transform: rotateY(10deg) scale(0.95);
+  }
+
+  .carousel__slide--active {
+    opacity: 1;
+    transform: rotateY(0) scale(1);
+  }
+}
+/* *************************** */
+/*       SELECT | FILTER       */
+/* *************************** */
+.filter-container {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.type-filter {
+  width: 18rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+}
+
+.type-filter:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.type-filter option {
+  padding: 0.5rem;
+  background: #fff;
+  color: #333;
+}
+
+.filter-container:hover .type-filter {
+  border-color: #4CAF50;
+}
+
+/* *************************** */
 /*       RESPONSIVE ADJUST     */
 /* *************************** */
 @media (max-width: 768px) {
@@ -593,5 +679,9 @@ span.price{
 
   .dialog {
     width: 90%;
+  }
+
+  .type-filter {
+    width: 100%;
   }
 }

@@ -46,15 +46,17 @@ export const useClientStore = defineStore('cliente', {
             //Capitalizamos el cliente
             const capitalizeClientName = clientName.charAt(0).toUpperCase() + clientName.slice(1).toLowerCase();
 
-            const {error } = await supabase
+            const { data, error } = await supabase
                 .from('clientes')
-                .insert([{ nombre: capitalizeClientName, id_master: id_master }]);
+                .insert([{ nombre: capitalizeClientName, id_master: id_master }])
+                .select();
 
             if (error) {
                 console.error('[STORE]Error al crear cliente:', error);
                 throw error;
             } else {
                 console.log('[STORE]CLIENTE: ', capitalizeClientName, ' CREADO');
+                return data[0];
             }
         },
 
