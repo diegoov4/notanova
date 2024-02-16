@@ -8,8 +8,7 @@ module.exports = defineConfig({
       new webpack.DefinePlugin({
         '__VUE_OPTIONS_API__': true,
         '__VUE_PROD_DEVTOOLS__': false,
-        // Define aquí la flag '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__'
-        // Si no sabes qué valor debe tener, usualmente se establece en 'false' para producción
+        // Flag '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__', defaul 'false' on PROD
         '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': false
       })
     ]

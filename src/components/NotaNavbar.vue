@@ -91,7 +91,11 @@ export default {
   display: flex;
   align-items: center;
 }
-
+.logo{
+  cursor: pointer;
+  font-size: 1.5rem;
+  height: 25px;
+}
 /* ----------------------------------------------------------------- */
 /*                      LOGOUT BUTTON                                */
 /* ----------------------------------------------------------------- */
