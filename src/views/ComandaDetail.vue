@@ -1,3 +1,138 @@
+<script setup>
+import { ref, onMounted, toRef } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/store/authStore'
+import { useComandaStore } from '@/store/comandaStore'
+import { useProductoStore } from '@/store/productoStore'
+import ProductSelectionDialog from '@/components/ProductSelectionDialog.vue'
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+const comandaStore = useComandaStore()
+const productStore = useProductoStore()
+const userMasterData = toRef(authStore, 'userMasterData')
+const productTypes = toRef(productStore, 'product_types')
+const comanda = toRef(comandaStore, 'comanda')
+const master_id = userMasterData.value.id
+const showProductSelection = ref(false)
+const optionsList = ref([])
+
+const fetchComandaById = async () => {
+  if (route.params.id) {
+    // Get Comanda data
+    await comandaStore.fetchComandaById(route.params.id)
+    console.info('[COMANDA] ', comanda)
+  } else {
+    console.error('Invalid Param ID: ', route.params.id)
+  }
+}
+const fetchProductos = async () => {
+  await productStore.fetchProductos(master_id)
+
+  optionsList.value = productTypes.value.map(type => ({
+    value: type.id,
+    description: `${type.categoria} > ${type.subcategoria}`,
+  }))
+}
+onMounted(() => {
+  fetchComandaById()
+  fetchProductos()
+})
+
+const increment = async producto => {
+  producto.cantidad++
+  await comandaStore.updateProductQuantity(
+    comanda.value.id,
+    producto.producto.id,
+    producto.cantidad
+  )
+  recalcularTotal()
+}
+
+const decrement = async producto => {
+  if (producto.cantidad > 1) {
+    producto.cantidad--
+    await comandaStore.updateProductQuantity(
+      comanda.value.id,
+      producto.producto.id,
+      producto.cantidad
+    )
+    recalcularTotal()
+  }
+}
+
+function recalcularTotal() {
+  let total = 0
+  comanda.value.comandas_productos.forEach(item => {
+    total += item.cantidad * item.producto.precio
+  })
+  comanda.value.total = total
+}
+
+const showProducts = selectedProducts => {
+  console.info('[STORE_showProducts]selectedProducts: ', selectedProducts)
+  console.info(
+    '[STORE_showProducts]comanda.value.comandas_productos: ',
+    comanda.value.comandas_productos
+  )
+  // Añadir productos seleccionados a la comanda existente
+  selectedProducts.forEach(product => {
+    const existingProduct = comanda.value.comandas_productos.find(p => p.producto.id === product.id)
+    if (existingProduct) {
+      existingProduct.cantidad += product.cantidad
+    } else {
+      comanda.value.comandas_productos.push({
+        producto: product,
+        cantidad: product.cantidad,
+      })
+    }
+  })
+  recalcularTotal()
+  showProductSelection.value = false
+
+  // Actualizar la comanda en el backend con los nuevos productos
+  console.info('Lista Productos a Actualizar: ', comanda.value.comandas_productos)
+  comandaStore.updateProductsComanda(comanda.value.id, comanda.value.comandas_productos)
+}
+
+const formatCurrency = value => {
+  if (value) {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(value)
+  }
+  return ''
+}
+
+const goToLandingHome = () => {
+  router.push({ name: 'LandingHome' })
+}
+
+const cerrarComanda = async () => {
+  // Primero confirmamos si quiere pagar
+  if (!confirm(`¿Quieres cobrar y cerrar la comanda?`)) {
+    return
+  }
+  // Cerramos comanda
+  const cerrado = await comandaStore.closeComanda(comanda.value.id)
+  if (!cerrado) {
+    alert('Ha habido un error al cerrar la comanda. Contacte con el administrador')
+  }
+  // Redirigir a la Home
+  router.push({ name: 'LandingHome' })
+}
+
+const eliminarProducto = async producto => {
+  console.info('EliminarProducto: ', producto)
+  if (!confirm(`¿Estás seguro de que deseas eliminar "${producto.titulo}" de la comanda?`)) {
+    return
+  }
+  await comandaStore.deleteProducto(comanda.value.id, producto.id)
+}
+</script>
+
 <template>
   <div class="comanda-detail-container">
     <!-- Cabecera Comanda -->
@@ -60,165 +195,6 @@
     </footer>
   </div>
 </template>
-
-<script>
-import { ref, onMounted, toRef } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@/store/authStore'
-import { useComandaStore } from '@/store/comandaStore'
-import { useProductoStore } from '@/store/productoStore'
-import ProductSelectionDialog from '@/components/ProductSelectionDialog.vue'
-
-export default {
-  name: 'ComandaDetail',
-  components: {
-    ProductSelectionDialog,
-  },
-  setup() {
-    const router = useRouter()
-    const route = useRoute()
-    const authStore = useAuthStore()
-    const comandaStore = useComandaStore()
-    const productStore = useProductoStore()
-    const userMasterData = toRef(authStore, 'userMasterData')
-    const productTypes = toRef(productStore, 'product_types')
-    const comanda = toRef(comandaStore, 'comanda')
-    const master_id = userMasterData.value.id
-    const showProductSelection = ref(false)
-    const optionsList = ref([])
-
-    const fetchComandaById = async () => {
-      if (route.params.id) {
-        // Get Comanda data
-        await comandaStore.fetchComandaById(route.params.id)
-        console.info('[COMANDA] ', comanda)
-      } else {
-        console.error('Invalid Param ID: ', route.params.id)
-      }
-    }
-    const fetchProductos = async () => {
-      await productStore.fetchProductos(master_id)
-
-      optionsList.value = productTypes.value.map(type => ({
-        value: type.id,
-        description: `${type.categoria} > ${type.subcategoria}`,
-      }))
-    }
-    onMounted(() => {
-      fetchComandaById()
-      fetchProductos()
-    })
-
-    const increment = async producto => {
-      producto.cantidad++
-      await comandaStore.updateProductQuantity(
-        comanda.value.id,
-        producto.producto.id,
-        producto.cantidad
-      )
-      recalcularTotal()
-    }
-
-    const decrement = async producto => {
-      if (producto.cantidad > 1) {
-        producto.cantidad--
-        await comandaStore.updateProductQuantity(
-          comanda.value.id,
-          producto.producto.id,
-          producto.cantidad
-        )
-        recalcularTotal()
-      }
-    }
-
-    function recalcularTotal() {
-      let total = 0
-      comanda.value.comandas_productos.forEach(item => {
-        total += item.cantidad * item.producto.precio
-      })
-      comanda.value.total = total
-    }
-
-    const showProducts = selectedProducts => {
-      console.info('[STORE_showProducts]selectedProducts: ', selectedProducts)
-      console.info(
-        '[STORE_showProducts]comanda.value.comandas_productos: ',
-        comanda.value.comandas_productos
-      )
-      // Añadir productos seleccionados a la comanda existente
-      selectedProducts.forEach(product => {
-        const existingProduct = comanda.value.comandas_productos.find(
-          p => p.producto.id === product.id
-        )
-        if (existingProduct) {
-          existingProduct.cantidad += product.cantidad
-        } else {
-          comanda.value.comandas_productos.push({
-            producto: product,
-            cantidad: product.cantidad,
-          })
-        }
-      })
-      recalcularTotal()
-      showProductSelection.value = false
-
-      // Actualizar la comanda en el backend con los nuevos productos
-      console.info('Lista Productos a Actualizar: ', comanda.value.comandas_productos)
-      comandaStore.updateProductsComanda(comanda.value.id, comanda.value.comandas_productos)
-    }
-
-    const formatCurrency = value => {
-      if (value) {
-        return new Intl.NumberFormat('es-ES', {
-          style: 'currency',
-          currency: 'EUR',
-        }).format(value)
-      }
-      return ''
-    }
-
-    const goToLandingHome = () => {
-      router.push({ name: 'LandingHome' })
-    }
-
-    const cerrarComanda = async () => {
-      // Primero confirmamos si quiere pagar
-      if (!confirm(`¿Quieres cobrar y cerrar la comanda?`)) {
-        return
-      }
-      // Cerramos comanda
-      const cerrado = await comandaStore.closeComanda(comanda.value.id)
-      if (!cerrado) {
-        alert('Ha habido un error al cerrar la comanda. Contacte con el administrador')
-      }
-      // Redirigir a la Home
-      router.push({ name: 'LandingHome' })
-    }
-
-    const eliminarProducto = async producto => {
-      console.info('EliminarProducto: ', producto)
-      if (!confirm(`¿Estás seguro de que deseas eliminar "${producto.titulo}" de la comanda?`)) {
-        return
-      }
-      await comandaStore.deleteProducto(comanda.value.id, producto.id)
-    }
-
-    return {
-      comanda,
-      cerrarComanda,
-      optionsList,
-      productTypes,
-      showProductSelection,
-      goToLandingHome,
-      showProducts,
-      eliminarProducto,
-      increment,
-      decrement,
-      formatCurrency,
-    }
-  },
-}
-</script>
 
 <style scoped>
 .comanda-detail-container {

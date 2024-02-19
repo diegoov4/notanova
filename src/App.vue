@@ -1,3 +1,10 @@
+<script setup>
+import { useAuthStore } from '@/store/authStore'
+import Navbar from '@/components/NotaNavbar.vue'
+
+const authStore = useAuthStore()
+</script>
+
 <template>
   <div id="app">
     <Navbar v-if="authStore.isAuthenticated" @open-dialog="showNewComandaDialog = true" />
@@ -13,22 +20,3 @@
     <!-- <Footer v-if="isAuthenticated" /> -->
   </div>
 </template>
-
-<script>
-import { useAuthStore } from '@/store/authStore'
-import Navbar from '@/components/NotaNavbar.vue'
-
-export default {
-  name: 'App',
-  components: {
-    Navbar,
-  },
-  setup() {
-    const authStore = useAuthStore()
-    return {
-      authStore,
-      showNewComandaDialog: false,
-    }
-  },
-}
-</script>

@@ -1,3 +1,42 @@
+<script setup>
+import { ref, computed, onMounted, toRef } from 'vue'
+import { useProductoStore } from '@/store/productoStore'
+
+defineProps({
+  optionsList: Array,
+})
+const emit = defineEmits(['selectedProducts', 'close'])
+
+const productosStore = useProductoStore()
+const images = toRef(productosStore, 'images')
+const productTypes = toRef(productosStore, 'product_types')
+const selectedType = ref('')
+
+const selectImage = image => {
+  emit('select', image)
+  close()
+}
+
+const fetchImages = async () => {
+  await productosStore.fetchImages()
+  console.info('[fetchTypes] ', productTypes, '[fetchImages] ', images)
+}
+
+onMounted(fetchImages)
+
+const close = () => emit('close')
+
+// Computed filter for image types
+const filteredImages = computed(() => {
+  let filterImg = images.value
+  if (selectedType.value) {
+    filterImg = images.value.filter(
+      image => image.product_types && image.product_types.id === selectedType.value.value
+    )
+  }
+  return filterImg
+})
+</script>
 <template>
   <div class="dialog-overlay" @click.self="close">
     <div class="dialog">
@@ -30,57 +69,6 @@
     </div>
   </div>
 </template>
-
-<script>
-import { ref, computed, onMounted, toRef } from 'vue'
-import { useProductoStore } from '@/store/productoStore'
-
-export default {
-  props: {
-    optionsList: Array,
-  },
-  setup(_, { emit }) {
-    const productosStore = useProductoStore()
-    const images = toRef(productosStore, 'images')
-    const productTypes = toRef(productosStore, 'product_types')
-    const selectedType = ref('')
-
-    const selectImage = image => {
-      emit('select', image)
-      close()
-    }
-
-    const fetchImages = async () => {
-      await productosStore.fetchImages()
-      console.info('[fetchTypes] ', productTypes, '[fetchImages] ', images)
-    }
-
-    onMounted(fetchImages)
-
-    const close = () => emit('close')
-
-    // Computed filter for image types
-    const filteredImages = computed(() => {
-      let filterImg = images.value
-      if (selectedType.value) {
-        filterImg = images.value.filter(
-          image => image.product_types && image.product_types.id === selectedType.value.value
-        )
-      }
-      return filterImg
-    })
-
-    return {
-      images,
-      filteredImages,
-      selectedType,
-      productTypes,
-      selectImage,
-      close,
-    }
-  },
-}
-</script>
 
 <style scoped>
 .image-list .product-item {

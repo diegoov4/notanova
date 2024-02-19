@@ -1,3 +1,110 @@
+<script setup>
+import { ref, onMounted, toRef } from 'vue'
+import { useAuthStore } from '@/store/authStore'
+import { useCommonStore } from '@/store/commonStore'
+import { useClientStore } from '@/store/clienteStore'
+import { useComandaStore } from '@/store/comandaStore'
+import { useProductoStore } from '@/store/productoStore'
+import CreateClientDialog from '@/components/CreateClientDialog.vue'
+import ProductSelectionDialog from '@/components/ProductSelectionDialog.vue'
+
+const emit = defineEmits(['comanda-saved', 'close'])
+
+const authStore = useAuthStore()
+const commonStore = useCommonStore()
+const clientStore = useClientStore()
+const comandaStore = useComandaStore()
+const productStore = useProductoStore()
+const userMasterData = toRef(authStore, 'userMasterData')
+const clientes = toRef(clientStore, 'clientes')
+const productTypes = toRef(productStore, 'product_types')
+const master_id = userMasterData.value.id
+const created_by = userMasterData.value.responsable
+const selectedCliente = ref(null)
+const showCreateClientDialog = ref(false)
+const showDropdown = ref(false)
+const productosSeleccionados = ref([])
+const showProductSelection = ref(false)
+const optionsList = ref([])
+
+const fetchClients = async () => {
+  await clientStore.fetchClients(master_id)
+}
+const fetchProductos = async () => {
+  await productStore.fetchProductos(master_id)
+
+  optionsList.value = productTypes.value.map(type => ({
+    value: type.id,
+    description: `${type.categoria} > ${type.subcategoria}`,
+  }))
+}
+onMounted(() => {
+  fetchClients()
+  fetchProductos()
+})
+
+const clientCreated = cliente => {
+  selectedCliente.value = cliente
+  fetchClients()
+}
+
+const selectCliente = cliente => {
+  selectedCliente.value = cliente
+  showDropdown.value = false
+}
+
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value
+}
+
+const showProducts = selectedProducts => {
+  productosSeleccionados.value = selectedProducts
+  showProductSelection.value = false
+}
+
+const removeProduct = producto => {
+  productosSeleccionados.value = productosSeleccionados.value.filter(p => p.id !== producto.id)
+}
+
+const saveComanda = async () => {
+  // DMO: remove at least 1 product
+  if (!selectedCliente.value) {
+    // || productosSeleccionados.value.length === 0
+    alert('Por favor, seleccione al menos un cliente')
+    return
+  }
+
+  // Create Comanda
+  try {
+    if (master_id) {
+      await comandaStore.createComanda(
+        selectedCliente.value,
+        productosSeleccionados.value,
+        created_by,
+        master_id
+      )
+
+      emit('comanda-saved')
+      resetDialog()
+    } else {
+      throw new Error('La información del local no está disponible.')
+    }
+  } catch (error) {
+    console.error('Error al guardar la comanda:', error)
+    error.value = error.message || 'Ocurrió un error desconocido.'
+  }
+}
+
+// Restablecer estado y cerrar diálogo
+const resetDialog = () => {
+  productosSeleccionados.value = []
+  selectedCliente.value = null
+  showProductSelection.value = false
+  commonStore.setShowNewComandaDialog(false)
+  emit('close')
+}
+</script>
+
 <template>
   <div class="dialog-overlay" @click.self="resetDialog">
     <div class="dialog">
@@ -75,137 +182,6 @@
     </div>
   </div>
 </template>
-
-<script>
-import { ref, onMounted, toRef } from 'vue'
-import { useAuthStore } from '@/store/authStore'
-import { useCommonStore } from '@/store/commonStore'
-import { useClientStore } from '@/store/clienteStore'
-import { useComandaStore } from '@/store/comandaStore'
-import { useProductoStore } from '@/store/productoStore'
-import CreateClientDialog from '@/components/CreateClientDialog.vue'
-import ProductSelectionDialog from '@/components/ProductSelectionDialog.vue'
-
-export default {
-  components: {
-    CreateClientDialog,
-    ProductSelectionDialog,
-  },
-  setup(_, { emit }) {
-    const authStore = useAuthStore()
-    const commonStore = useCommonStore()
-    const clientStore = useClientStore()
-    const comandaStore = useComandaStore()
-    const productStore = useProductoStore()
-    const userMasterData = toRef(authStore, 'userMasterData')
-    const clientes = toRef(clientStore, 'clientes')
-    const productTypes = toRef(productStore, 'product_types')
-    const master_id = userMasterData.value.id
-    const created_by = userMasterData.value.responsable
-    const selectedCliente = ref(null)
-    const showCreateClientDialog = ref(false)
-    const showDropdown = ref(false)
-    const productosSeleccionados = ref([])
-    const showProductSelection = ref(false)
-    const optionsList = ref([])
-
-    const fetchClients = async () => {
-      await clientStore.fetchClients(master_id)
-    }
-    const fetchProductos = async () => {
-      await productStore.fetchProductos(master_id)
-
-      optionsList.value = productTypes.value.map(type => ({
-        value: type.id,
-        description: `${type.categoria} > ${type.subcategoria}`,
-      }))
-    }
-    onMounted(() => {
-      fetchClients()
-      fetchProductos()
-    })
-
-    const clientCreated = cliente => {
-      selectedCliente.value = cliente
-      fetchClients()
-    }
-
-    const selectCliente = cliente => {
-      selectedCliente.value = cliente
-      showDropdown.value = false
-    }
-
-    const toggleDropdown = () => {
-      showDropdown.value = !showDropdown.value
-    }
-
-    const showProducts = selectedProducts => {
-      productosSeleccionados.value = selectedProducts
-      showProductSelection.value = false
-    }
-
-    const removeProduct = producto => {
-      productosSeleccionados.value = productosSeleccionados.value.filter(p => p.id !== producto.id)
-    }
-
-    const saveComanda = async () => {
-      // DMO: remove at least 1 product
-      if (!selectedCliente.value) {
-        // || productosSeleccionados.value.length === 0
-        alert('Por favor, seleccione al menos un cliente')
-        return
-      }
-
-      // Create Comanda
-      try {
-        if (master_id) {
-          await comandaStore.createComanda(
-            selectedCliente.value,
-            productosSeleccionados.value,
-            created_by,
-            master_id
-          )
-
-          emit('comanda-saved')
-          resetDialog()
-        } else {
-          throw new Error('La información del local no está disponible.')
-        }
-      } catch (error) {
-        console.error('Error al guardar la comanda:', error)
-        error.value = error.message || 'Ocurrió un error desconocido.'
-      }
-    }
-
-    // Restablecer estado y cerrar diálogo
-    const resetDialog = () => {
-      productosSeleccionados.value = []
-      selectedCliente.value = null
-      showProductSelection.value = false
-      commonStore.setShowNewComandaDialog(false)
-      emit('close')
-    }
-
-    return {
-      clientes,
-      selectedCliente,
-      showCreateClientDialog,
-      optionsList,
-      toggleDropdown,
-      showDropdown,
-      selectCliente,
-      clientCreated,
-      fetchClients,
-      productosSeleccionados,
-      showProductSelection,
-      showProducts,
-      removeProduct,
-      saveComanda,
-      resetDialog,
-    }
-  },
-}
-</script>
 
 <style scoped>
 .product-dialog-container {

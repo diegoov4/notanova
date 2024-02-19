@@ -1,3 +1,39 @@
+<script setup>
+import { ref, toRef } from 'vue'
+import { useAuthStore } from '@/store/authStore'
+import { useClientStore } from '@/store/clienteStore'
+
+const emit = defineEmits(['clientCreated', 'close'])
+
+const newClientName = ref('')
+const authStore = useAuthStore()
+const clientStore = useClientStore()
+const userMasterData = toRef(authStore, 'userMasterData')
+const master_id = userMasterData.value.id
+
+const addNewClient = async () => {
+  if (!newClientName.value.trim()) {
+    console.error('Por favor, ingresa un nombre para el cliente.')
+    return
+  }
+  // Create Client
+  try {
+    if (master_id) {
+      const clientCreated = await clientStore.createClient(newClientName.value, master_id)
+      newClientName.value = ''
+
+      emit('clientCreated', clientCreated)
+      close()
+    }
+  } catch (error) {
+    console.error('Error al crear cliente[DIALOG]:', error)
+    alert('Hubo un error al crear el cliente.')
+  }
+}
+
+const close = () => emit('close')
+</script>
+
 <template>
   <transition name="fade" appear>
     <div class="dialog-overlay create-client-overlay" @click.self="close">
@@ -22,46 +58,6 @@
     </div>
   </transition>
 </template>
-
-<script>
-import { ref, toRef } from 'vue'
-import { useAuthStore } from '@/store/authStore'
-import { useClientStore } from '@/store/clienteStore'
-
-export default {
-  setup(_, { emit }) {
-    const newClientName = ref('')
-    const authStore = useAuthStore()
-    const clientStore = useClientStore()
-    const userMasterData = toRef(authStore, 'userMasterData')
-    const master_id = userMasterData.value.id
-
-    const addNewClient = async () => {
-      if (!newClientName.value.trim()) {
-        console.error('Por favor, ingresa un nombre para el cliente.')
-        return
-      }
-      // Create Client
-      try {
-        if (master_id) {
-          const clientCreated = await clientStore.createClient(newClientName.value, master_id)
-          newClientName.value = ''
-
-          emit('clientCreated', clientCreated)
-          close()
-        }
-      } catch (error) {
-        console.error('Error al crear cliente[DIALOG]:', error)
-        alert('Hubo un error al crear el cliente.')
-      }
-    }
-
-    const close = () => emit('close')
-
-    return { newClientName, addNewClient, close }
-  },
-}
-</script>
 
 <style scoped>
 .create-client-overlay {

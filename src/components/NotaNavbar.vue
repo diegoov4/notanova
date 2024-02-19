@@ -1,3 +1,30 @@
+<script setup>
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/store/authStore'
+import { useCommonStore } from '@/store/commonStore'
+import { supabase } from '@/services/supabase'
+
+const authStore = useAuthStore()
+const commonStore = useCommonStore()
+const router = useRouter()
+
+const openDialog = () => {
+  goToLandingHome()
+  commonStore.setShowNewComandaDialog(true)
+}
+
+const logout = async () => {
+  await supabase.auth.signOut()
+  authStore.clearUser()
+  commonStore.clearData()
+  router.push({ name: 'mLogin' })
+}
+
+const goToLandingHome = () => {
+  router.push({ name: 'LandingHome' })
+}
+</script>
+
 <template>
   <nav class="navbar">
     <div class="logo">
@@ -20,45 +47,6 @@
     </div>
   </nav>
 </template>
-
-<script>
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/store/authStore'
-import { useCommonStore } from '@/store/commonStore'
-import { supabase } from '@/services/supabase'
-
-export default {
-  name: 'NotaNavbar',
-  setup() {
-    const authStore = useAuthStore()
-    const commonStore = useCommonStore()
-    const router = useRouter()
-
-    const openDialog = () => {
-      goToLandingHome()
-      commonStore.setShowNewComandaDialog(true)
-    }
-
-    const logout = async () => {
-      await supabase.auth.signOut()
-      authStore.clearUser()
-      commonStore.clearData()
-      router.push({ name: 'mLogin' })
-    }
-
-    const goToLandingHome = () => {
-      router.push({ name: 'LandingHome' })
-    }
-
-    return {
-      auth_user: authStore.auth_user,
-      openDialog,
-      goToLandingHome,
-      logout,
-    }
-  },
-}
-</script>
 
 <style scoped>
 .navbar {
