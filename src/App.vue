@@ -1,7 +1,13 @@
 <template>
   <div id="app">
     <Navbar v-if="authStore.isAuthenticated" @open-dialog="showNewComandaDialog = true" />
-    <main class="main" :class="{ 'with-navbar': authStore.isAuthenticated, 'without-navbar': !authStore.isAuthenticated }">
+    <main
+      class="main"
+      :class="{
+        'with-navbar': authStore.isAuthenticated,
+        'without-navbar': !authStore.isAuthenticated,
+      }"
+    >
       <router-view />
     </main>
     <!-- <Footer v-if="isAuthenticated" /> -->
@@ -9,8 +15,8 @@
 </template>
 
 <script>
-import { useAuthStore } from '@/store/authStore';
-import Navbar from '@/components/NotaNavbar.vue';
+import { useAuthStore } from '@/store/authStore'
+import Navbar from '@/components/NotaNavbar.vue'
 
 export default {
   name: 'App',
@@ -18,11 +24,11 @@ export default {
     Navbar,
   },
   setup() {
-    const authStore = useAuthStore();
+    const authStore = useAuthStore()
     return {
       authStore,
       showNewComandaDialog: false,
-    };
+    }
   },
-};
+}
 </script>

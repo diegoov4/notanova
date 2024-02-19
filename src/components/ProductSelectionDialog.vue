@@ -8,7 +8,13 @@
       </header>
       <!-- Filter Type -->
       <div class="filter-container">
-        <v-select class="type-filter" :options="optionsList" v-model="selectedType" label="description" placeholder="Tipo de producto" />
+        <v-select
+          class="type-filter"
+          :options="optionsList"
+          v-model="selectedType"
+          label="description"
+          placeholder="Tipo de producto"
+        />
       </div>
       <!-- Product Picker -->
       <ul class="products-picker">
@@ -17,11 +23,13 @@
             <img :src="product.images.url" class="product-image" :alt="product.titulo" />
           </div>
           <div class="product-details">
-            <div class="product-title">{{ product.titulo }} | <span class="price">{{
-              formatCurrency(product.precio) }}</span></div>
+            <div class="product-title">
+              {{ product.titulo }} |
+              <span class="price">{{ formatCurrency(product.precio) }}</span>
+            </div>
             <div class="number-input">
               <button @click="decrement(product)">-</button>
-              <input v-model.number="product.cantidad" min="0" type="number">
+              <input v-model.number="product.cantidad" min="0" type="number" />
               <button @click="increment(product)">+</button>
             </div>
           </div>
@@ -35,24 +43,23 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, toRef } from 'vue';
+import { ref, computed, onMounted, toRef } from 'vue'
 // import { useAuthStore } from '@/store/authStore';
-import { useProductoStore } from '@/store/productoStore';
+import { useProductoStore } from '@/store/productoStore'
 
 export default {
   props: {
-    optionsList: Array
+    optionsList: Array,
   },
   setup(_, { emit }) {
     // const authStore         = useAuthStore();
-    const productoStore     = useProductoStore();
+    const productoStore = useProductoStore()
     // const userMasterData    = toRef(authStore, "userMasterData");
-    const availableProducts = toRef(productoStore,'productos');
+    const availableProducts = toRef(productoStore, 'productos')
     // const master_id         = userMasterData.value.id;
-    const selectedType      = ref('');
+    const selectedType = ref('')
     // const optionsList       = ref([]);
-    const selectedProducts  = ref([]);
-
+    const selectedProducts = ref([])
 
     // const fetchProductos = async () => {
     //   if (master_id) {
@@ -71,59 +78,57 @@ export default {
     // Reset 'cantidad' to 0 for new products
     const resetCantidad = () => {
       availableProducts.value = availableProducts.value.map(product => ({
-          ...product,
-          cantidad: 0
-      }));
+        ...product,
+        cantidad: 0,
+      }))
     }
-    onMounted(resetCantidad);
-
+    onMounted(resetCantidad)
 
     const confirmSelection = () => {
       const selected = availableProducts.value
-        .filter((product) => product.cantidad > 0)
-        .map((product) => ({
+        .filter(product => product.cantidad > 0)
+        .map(product => ({
           id: product.id,
           titulo: product.titulo,
           images: { url: product.images.url },
           cantidad: product.cantidad,
           precio: product.precio,
-        }));
+        }))
 
-      console.log('Selected products:', selected);
-      emit('selectedProducts', selected);
-      close();
-    };
+      emit('selectedProducts', selected)
+      close()
+    }
 
     // Computed filter for image types
     const filteredProducts = computed(() => {
       if (selectedType.value) {
-        return availableProducts.value.filter((producto) => {
-          return producto.images.product_types.id === selectedType.value.value;
-        });
+        return availableProducts.value.filter(producto => {
+          return producto.images.product_types.id === selectedType.value.value
+        })
       }
-      return availableProducts.value;
-    });
+      return availableProducts.value
+    })
 
-    const formatCurrency = (value) => {
+    const formatCurrency = value => {
       if (value) {
         return new Intl.NumberFormat('es-ES', {
           style: 'currency',
           currency: 'EUR',
-        }).format(value);
+        }).format(value)
       }
-      return '';
-    };
+      return ''
+    }
 
-    const increment = (product) => {
-      product.cantidad++;
-    };
-    const decrement = (product) => {
+    const increment = product => {
+      product.cantidad++
+    }
+    const decrement = product => {
       if (product.cantidad > 0) {
-        product.cantidad--;
+        product.cantidad--
       }
-    };
+    }
 
-    const close = () => emit('close');
+    const close = () => emit('close')
 
     return {
       availableProducts,
@@ -135,8 +140,8 @@ export default {
       formatCurrency,
       increment,
       decrement,
-      close
-    };
-  }
-};
+      close,
+    }
+  },
+}
 </script>
