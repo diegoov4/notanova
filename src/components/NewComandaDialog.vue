@@ -5,8 +5,6 @@ import { useCommonStore } from '@/store/commonStore'
 import { useClientStore } from '@/store/clienteStore'
 import { useComandaStore } from '@/store/comandaStore'
 import { useProductoStore } from '@/store/productoStore'
-import CreateClientDialog from '@/components/CreateClientDialog.vue'
-import ProductSelectionDialog from '@/components/ProductSelectionDialog.vue'
 
 const emit = defineEmits(['comanda-saved', 'close'])
 
@@ -124,8 +122,8 @@ const resetDialog = () => {
           <ul v-if="showDropdown" class="dropdown">
             <li v-if="clientes.length === 0" @click="selectCliente('Cliente')">[Sin clientes]</li>
             <li
-              v-else
               v-for="cliente in clientes"
+              v-else
               :key="cliente.id"
               @click="selectCliente(cliente)"
             >
@@ -140,7 +138,7 @@ const resetDialog = () => {
         <CreateClientDialog
           v-if="showCreateClientDialog"
           @close="showCreateClientDialog = false"
-          @clientCreated="clientCreated"
+          @client-created="clientCreated"
         />
 
         <!-- Lista de productos seleccionados -->
@@ -156,8 +154,8 @@ const resetDialog = () => {
             <div class="product-info">
               <div class="product-title">{{ producto.titulo }}</div>
               <div class="product-controls">
-                <input type="number" min="0" v-model="producto.cantidad" class="product-quantity" />
-                <button @click="removeProduct(producto)" class="remove-product-button">
+                <input v-model="producto.cantidad" type="number" min="0" class="product-quantity" />
+                <button class="remove-product-button" @click="removeProduct(producto)">
                   <i class="fas fa-trash-alt fa-xs"></i>
                 </button>
               </div>
@@ -168,10 +166,10 @@ const resetDialog = () => {
         <button class="button" @click="showProductSelection = true">Añadir Productos</button>
 
         <!-- Dialog para selección de productos -->
-        <div class="product-dialog-container" v-if="showProductSelection">
+        <div v-if="showProductSelection" class="product-dialog-container">
           <ProductSelectionDialog
             :options-list="optionsList"
-            @selectedProducts="showProducts"
+            @selected-products="showProducts"
             @close="showProductSelection = false"
           />
         </div>

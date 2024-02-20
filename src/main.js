@@ -20,6 +20,6 @@ pinia.use(piniaPluginPersistedstate)
 const app = createApp(App)
 app.use(pinia)
 app.use(router)
-app.component('v-select', vSelect)
+app.component('VSelect', vSelect)
 
 app.mount('#app')

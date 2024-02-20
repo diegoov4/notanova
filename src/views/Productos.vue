@@ -2,7 +2,6 @@
 import { ref, onMounted, toRef, computed } from 'vue'
 import { useAuthStore } from '@/store/authStore'
 import { useProductoStore } from '@/store/productoStore'
-import ImageSelectorDialog from '@/components/ImageSelectorDialog.vue'
 // Carousel
 import 'vue3-carousel/dist/carousel.css'
 import { Carousel, Navigation, Slide } from 'vue3-carousel'
@@ -117,16 +116,16 @@ const formatCurrency = value => {
     <div class="products-header">
       <!-- Carrito -->
       <div class="add-product-button-container">
-        <button @click="showFormularioNuevo = true" class="button button-yellow">
+        <button class="button button-yellow" @click="showFormularioNuevo = true">
           <i class="fa-solid fa-cart-plus fa-xl"></i>
         </button>
       </div>
       <!-- Type Filter -->
       <div class="filter-container">
         <v-select
+          v-model="selectedType"
           class="type-filter"
           :options="optionsList"
-          v-model="selectedType"
           label="description"
           placeholder="Tipo de producto"
         />
@@ -154,13 +153,13 @@ const formatCurrency = value => {
           <span>{{ selectedImage?.titulo || 'Imagen' }}</span>
           <i class="fa-solid fa-plus"></i>
         </div>
-        <button @click="agregarNuevoProducto" class="button button-green">Guardar</button>
-        <button @click="showFormularioNuevo = false" class="button button-red">Cerrar</button>
+        <button class="button button-green" @click="agregarNuevoProducto">Guardar</button>
+        <button class="button button-red" @click="showFormularioNuevo = false">Cerrar</button>
       </div>
     </div>
 
     <!-- Select Image -->
-    <div class="product-dialog-container" v-if="showImageSelector">
+    <div v-if="showImageSelector" class="product-dialog-container">
       <ImageSelectorDialog
         :options-list="optionsList"
         @select="handleImageSelect"
@@ -172,8 +171,8 @@ const formatCurrency = value => {
     <Carousel
       v-if="!showFormularioNuevo"
       class="activeClasses"
-      :itemsToShow="3.95"
-      :wrapAround="true"
+      :items-to-show="3.95"
+      :wrap-around="true"
       :transition="500"
     >
       <Slide v-for="product in filteredProducts" :key="product.id">
@@ -181,7 +180,7 @@ const formatCurrency = value => {
           <img :src="product.images.url" :alt="product.titulo" class="product-image" />
           <h3 class="product-title">{{ product.titulo }}</h3>
           <p>{{ formatCurrency(product.precio) }}</p>
-          <button @click="deleteProduct(product)" class="button button-red delete-button">
+          <button class="button button-red delete-button" @click="deleteProduct(product)">
             <i class="fas fa-trash-alt"></i>
           </button>
         </div>

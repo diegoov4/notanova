@@ -23,6 +23,8 @@ const logout = async () => {
 const goToLandingHome = () => {
   router.push({ name: 'LandingHome' })
 }
+
+const auth_user = authStore.auth_user
 </script>
 
 <template>
@@ -30,20 +32,21 @@ const goToLandingHome = () => {
     <div class="logo">
       <img
         src="@/assets/logo_final.png"
-        @click="goToLandingHome"
         class="home-button"
         alt="NotaNova Logo"
+        @click="goToLandingHome"
       />
     </div>
     <div class="navbar-menu">
-      <button @click="openDialog" class="button button-green">+ Comanda</button>
+      <button class="button button-green" @click="openDialog">+ Comanda</button>
       <router-link to="/productos" class="navbar-item">Productos</router-link>
       <router-link to="/clientes" class="navbar-item">Clientes</router-link>
       <router-link to="/mesas" class="navbar-item">Mesas</router-link>
     </div>
     <div class="navbar-end">
       <span class="navbar-item">{{ auth_user?.email }}</span>
-      <i class="fa-solid fa-arrow-right-from-bracket logout-button" @click="logout"></i>
+      <i-mdi-logout class="logout-button" @click="logout" />
+      <!-- <i class="fa-solid fa-arrow-right-from-bracket logout-button" @click="logout"></i> -->
     </div>
   </nav>
 </template>

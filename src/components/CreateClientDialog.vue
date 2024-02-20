@@ -46,8 +46,8 @@ const close = () => emit('close')
         </header>
         <div class="dialog-body">
           <input
-            type="text"
             v-model="newClientName"
+            type="text"
             placeholder="Nombre del cliente"
             class="input-client-name"
             @keyup.enter="addNewClient"

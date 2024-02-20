@@ -5,7 +5,7 @@ import { useProductoStore } from '@/store/productoStore'
 defineProps({
   optionsList: Array,
 })
-const emit = defineEmits(['selectedProducts', 'close'])
+const emit = defineEmits(['close', 'select'])
 
 const productosStore = useProductoStore()
 const images = toRef(productosStore, 'images')
@@ -37,24 +37,25 @@ const filteredImages = computed(() => {
   return filterImg
 })
 </script>
+
 <template>
   <div class="dialog-overlay" @click.self="close">
     <div class="dialog">
       <!-- Type Filter -->
       <div class="filter-container">
         <v-select
+          v-model="selectedType"
           class="type-filter"
           :options="optionsList"
-          v-model="selectedType"
           label="description"
           placeholder="Tipo de producto"
         />
       </div>
       <ul class="products-picker image-list">
         <li
-          class="product-item"
           v-for="image in filteredImages"
           :key="image.id"
+          class="product-item"
           @click="selectImage(image)"
         >
           <div class="product-image-container">

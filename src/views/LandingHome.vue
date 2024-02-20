@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/authStore'
 import { useCommonStore } from '@/store/commonStore'
 import { useComandaStore } from '@/store/comandaStore'
-import NewComandaDialog from '@/components/NewComandaDialog.vue'
 
 const authStore = useAuthStore()
 const commonStore = useCommonStore()

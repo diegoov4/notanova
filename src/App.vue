@@ -3,6 +3,8 @@ import { useAuthStore } from '@/store/authStore'
 import Navbar from '@/components/NotaNavbar.vue'
 
 const authStore = useAuthStore()
+
+const showNewComandaDialog = false
 </script>
 
 <template>

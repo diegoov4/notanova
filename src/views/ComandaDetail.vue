@@ -4,7 +4,6 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/authStore'
 import { useComandaStore } from '@/store/comandaStore'
 import { useProductoStore } from '@/store/productoStore'
-import ProductSelectionDialog from '@/components/ProductSelectionDialog.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -140,7 +139,7 @@ const eliminarProducto = async producto => {
       <h2 class="comanda-title">{{ comanda?.clientes.nombre || 'Cliente Desconocido' }}</h2>
       <p class="comanda-total">
         Total:
-        <span @click="cerrarComanda" class="comanda-total-price">
+        <span class="comanda-total-price" @click="cerrarComanda">
           {{ formatCurrency(comanda?.total) || '0 €' }}
         </span>
       </p>
@@ -169,7 +168,7 @@ const eliminarProducto = async producto => {
               <button @click="increment(producto_b)">+</button>
             </div>
           </div>
-          <button @click="eliminarProducto(producto_b.producto)" class="button button-red">
+          <button class="button button-red" @click="eliminarProducto(producto_b.producto)">
             ×
           </button>
         </li>
@@ -177,10 +176,10 @@ const eliminarProducto = async producto => {
     </section>
 
     <!-- Dialogo Selección Productos -->
-    <div class="product-dialog-container" v-if="showProductSelection">
+    <div v-if="showProductSelection" class="product-dialog-container">
       <ProductSelectionDialog
         :options-list="optionsList"
-        @selectedProducts="showProducts"
+        @selected-products="showProducts"
         @close="showProductSelection = false"
       />
     </div>
@@ -188,10 +187,10 @@ const eliminarProducto = async producto => {
     <!-- Footer. Editar comanda y Cerrar (pagar) -->
     <footer class="comanda-footer">
       <div class="edit-buttons">
-        <button @click="showProductSelection = true" class="button button-yellow">Productos</button>
-        <button @click="updateComanda" class="button button-green">Guardar</button>
+        <button class="button button-yellow" @click="showProductSelection = true">Productos</button>
+        <button class="button button-green" @click="updateComanda">Guardar</button>
       </div>
-      <button @click="goToLandingHome" class="button button-salir">Salir</button>
+      <button class="button button-salir" @click="goToLandingHome">Salir</button>
     </footer>
   </div>
 </template>

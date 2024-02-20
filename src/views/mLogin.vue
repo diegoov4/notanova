@@ -39,10 +39,10 @@ const handleLogin = async () => {
     <h1 class="title">Iniciar Sesión</h1>
     <form @submit.prevent="handleLogin">
       <div class="field">
-        <input type="email" id="email" v-model="email" required placeholder="Email" />
+        <input id="email" v-model="email" type="email" required placeholder="Email" />
       </div>
       <div class="field">
-        <input type="password" id="password" v-model="password" required placeholder="Contraseña" />
+        <input id="password" v-model="password" type="password" required placeholder="Contraseña" />
       </div>
       <div class="actions">
         <button type="submit" class="button button-green">ACCEDER</button>

@@ -98,16 +98,16 @@ const close = () => emit('close')
       <!-- Filter Type -->
       <div class="filter-container">
         <v-select
+          v-model="selectedType"
           class="type-filter"
           :options="optionsList"
-          v-model="selectedType"
           label="description"
           placeholder="Tipo de producto"
         />
       </div>
       <!-- Product Picker -->
       <ul class="products-picker">
-        <li class="product-item" v-for="product in filteredProducts" :key="product.id">
+        <li v-for="product in filteredProducts" :key="product.id" class="product-item">
           <div class="product-image-container">
             <img :src="product.images.url" class="product-image" :alt="product.titulo" />
           </div>
