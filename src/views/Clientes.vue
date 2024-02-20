@@ -6,7 +6,7 @@
 
 <style scoped>
 .title {
-    margin-bottom: 2rem;
-    color: white;
+  margin-bottom: 2rem;
+  color: white;
 }
-</style> 
+</style>

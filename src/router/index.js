@@ -1,7 +1,7 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '@/store/authStore';
-import LandingHome from '@/views/LandingHome.vue';
-import Login from '@/views/mLogin.vue';
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/store/authStore'
+import LandingHome from '@/views/LandingHome.vue'
+import Login from '@/views/mLogin.vue'
 import ComandaDetail from '@/views/ComandaDetail.vue'
 import Clientes from '@/views/Clientes.vue'
 import Mesas from '@/views/Mesas.vue'
@@ -49,18 +49,18 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-});
+})
 
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore();
+  const authStore = useAuthStore()
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'mLogin' });
+    next({ name: 'mLogin' })
   } else if (!to.meta.requiresAuth && authStore.isAuthenticated) {
-    next({ name: 'LandingHome' });
+    next({ name: 'LandingHome' })
   } else {
-    next();
+    next()
   }
-});
+})
 
-export default router;
+export default router

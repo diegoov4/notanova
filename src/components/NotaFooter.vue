@@ -1,5 +1,3 @@
 <template>
-    <id class="footer">
-        
-    </id>
+  <id class="footer"></id>
 </template>

@@ -17,7 +17,6 @@ html {
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
-
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-size: cover;
@@ -103,7 +102,6 @@ img {
   flex-direction: column;
 }
 
-
 /* ************************ */
 /*     ANIMATIONS           */
 /* ************************ */
@@ -125,8 +123,7 @@ img {
 
 .fade-enter,
 .fade-leave-to
-/* .fade-leave-active below version 2.1.8 */
-{
+/* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
 }
 
@@ -141,14 +138,14 @@ a:focus-visible {
 /* INPUT NUMBER CUSTOM: DMO */
 /* ************************ */
 
-input[type="number"] {
+input[type='number'] {
   -webkit-appearance: textfield;
   -moz-appearance: textfield;
   appearance: textfield;
 }
 
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
 }
 
@@ -163,7 +160,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .number-input button {
-  outline:none;
+  outline: none;
   -webkit-appearance: none;
   appearance: none;
   background-color: transparent;
@@ -194,10 +191,10 @@ input[type=number]::-webkit-outer-spin-button {
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
-.number-input input[type=number] {
+.number-input input[type='number'] {
   font-family: sans-serif;
   max-width: 5rem;
-  padding: .5rem;
+  padding: 0.5rem;
   border: none;
   border-width: 0 2px;
   font-size: 2rem;
@@ -208,12 +205,11 @@ input[type=number]::-webkit-outer-spin-button {
   color: #333333;
 }
 
-
 /* ************************ */
 /* LandingHome & global CSS */
 /* ************************ */
-.green{
-  color:#007651;
+.green {
+  color: #007651;
 }
 
 .red {
@@ -238,7 +234,6 @@ input[type=number]::-webkit-outer-spin-button {
   opacity: 0.8;
   min-height: 100vh;
   height: 100vh;
-  
 }
 
 .with-navbar {
@@ -263,7 +258,9 @@ input[type=number]::-webkit-outer-spin-button {
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 .button:hover {
@@ -303,18 +300,15 @@ input[type=number]::-webkit-outer-spin-button {
   color: #333;
 }
 
-.button-salir:hover{
+.button-salir:hover {
   border-color: #da2911;
   color: #da2911;
 }
-
 
 .error-message {
   color: #d9534f;
   margin-top: 1rem;
 }
-
-
 
 /* ************************ */
 /*        COMANDAS          */
@@ -347,7 +341,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 .comanda-item {
   background-image: url('@/assets/hoja-comanda.png');
-  background-size: cover;  /* O utiliza contain para ver toda la hoja */
+  background-size: cover; /* O utiliza contain para ver toda la hoja */
   background-repeat: no-repeat;
   background-position: center;
   padding: 2rem;
@@ -386,7 +380,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 /* Recalcamos el precio total */
-.comanda-total-price{
+.comanda-total-price {
   font-style: italic;
   font-weight: bold;
   color: #998402;
@@ -425,7 +419,7 @@ input[type=number]::-webkit-outer-spin-button {
   align-items: center;
 }
 
-.products-picker .product-item input[type="checkbox"] {
+.products-picker .product-item input[type='checkbox'] {
   margin-right: 1rem;
 }
 
@@ -459,8 +453,8 @@ input[type=number]::-webkit-outer-spin-button {
   margin-right: 10px;
 }
 
-span.price{
-  color:#007651;
+span.price {
+  color: #007651;
 }
 
 .pedido-section {
@@ -515,7 +509,9 @@ span.price{
   max-width: 500px;
   padding: 1.5rem;
   margin: 1rem;
-  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  transition:
+    transform 0.3s ease-out,
+    opacity 0.3s ease-out;
   transform: translateY(-20px);
   opacity: 0;
 }
@@ -571,7 +567,7 @@ span.price{
 /* *************************** */
 .activeClasses {
   margin-top: 4rem;
-  .carousel__item p{
+  .carousel__item p {
     color: #fdda00;
     font-weight: bold;
   }
@@ -596,7 +592,7 @@ span.price{
     transform: rotateY(-20deg) scale(0.9);
   }
 
-  .carousel__slide--active~.carousel__slide {
+  .carousel__slide--active ~ .carousel__slide {
     transform: rotateY(20deg) scale(0.9);
   }
 
@@ -637,7 +633,7 @@ span.price{
 
 .type-filter:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
@@ -648,7 +644,7 @@ span.price{
 }
 
 .filter-container:hover .type-filter {
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 /* *************************** */

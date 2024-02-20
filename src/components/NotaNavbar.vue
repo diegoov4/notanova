@@ -1,60 +1,56 @@
+<script setup>
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/store/authStore'
+import { useCommonStore } from '@/store/commonStore'
+import { supabase } from '@/services/supabase'
+
+const authStore = useAuthStore()
+const commonStore = useCommonStore()
+const router = useRouter()
+
+const openDialog = () => {
+  goToLandingHome()
+  commonStore.setShowNewComandaDialog(true)
+}
+
+const logout = async () => {
+  await supabase.auth.signOut()
+  authStore.clearUser()
+  commonStore.clearData()
+  router.push({ name: 'mLogin' })
+}
+
+const goToLandingHome = () => {
+  router.push({ name: 'LandingHome' })
+}
+
+const auth_user = authStore.auth_user
+</script>
+
 <template>
   <nav class="navbar">
     <div class="logo">
-      <img src="@/assets/logo_final.png" @click="goToLandingHome" class="home-button" alt="NotaNova Logo" />
+      <img
+        src="@/assets/logo_final.png"
+        class="home-button"
+        alt="NotaNova Logo"
+        @click="goToLandingHome"
+      />
     </div>
     <div class="navbar-menu">
-      <button @click="openDialog" class="button button-green">+ Comanda</button>
+      <button class="button button-green" @click="openDialog">+ Comanda</button>
       <router-link to="/productos" class="navbar-item">Productos</router-link>
       <router-link to="/clientes" class="navbar-item">Clientes</router-link>
       <router-link to="/mesas" class="navbar-item">Mesas</router-link>
     </div>
     <div class="navbar-end">
       <span class="navbar-item">{{ auth_user?.email }}</span>
-      <i class="fa-solid fa-arrow-right-from-bracket logout-button" @click="logout"></i>
+      <i-mdi-logout class="logout-button" @click="logout" />
+      <!-- <i class="fa-solid fa-arrow-right-from-bracket logout-button" @click="logout"></i> -->
     </div>
   </nav>
 </template>
-  
-<script>
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/store/authStore';
-import { useCommonStore } from '@/store/commonStore';
-import { supabase } from '@/services/supabase';
 
-export default {
-  name: 'NotaNavbar',
-  setup() {
-    const authStore = useAuthStore();
-    const commonStore = useCommonStore();
-    const router = useRouter();
-
-    const openDialog = () => {
-      goToLandingHome()
-      commonStore.setShowNewComandaDialog(true);
-    };
-    
-    const logout = async () => {
-      await supabase.auth.signOut();
-      authStore.clearUser();
-      commonStore.clearData();
-      router.push({ name: 'mLogin' });
-    };
-
-    const goToLandingHome = () => {
-      router.push({ name: 'LandingHome' });
-    }
-
-    return {
-      auth_user: authStore.auth_user,
-      openDialog,
-      goToLandingHome,
-      logout,
-    };
-  },
-};
-</script>
-  
 <style scoped>
 .navbar {
   display: flex;
@@ -82,7 +78,7 @@ export default {
   transition: background-color 0.3s;
 }
 
-.navbar-item:hover{
+.navbar-item:hover {
   background-color: #f2f2f2;
   text-decoration: none;
 }
@@ -91,7 +87,7 @@ export default {
   display: flex;
   align-items: center;
 }
-.logo{
+.logo {
   cursor: pointer;
   font-size: 1.5rem;
   height: 25px;
@@ -115,4 +111,4 @@ export default {
 .icon {
   transition: color 0.3s ease;
 }
-</style>  
+</style>

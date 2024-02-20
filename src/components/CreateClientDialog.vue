@@ -1,61 +1,63 @@
-<template>
-    <transition name="fade">
-        <div class="dialog-overlay create-client-overlay" @click.self="close">
-            <div class="dialog create-client-dialog">
-                <header class="dialog-header">
-                    <h3>Nuevo Cliente</h3>
-                    <button class="close-button" @click="close">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </header>
-                <div class="dialog-body">
-                    <input type="text" v-model="newClientName" placeholder="Nombre del cliente" class="input-client-name" @keyup.enter="addNewClient" />
-                    <button class="button button-green" @click="addNewClient">Crear</button>
-                </div>
-            </div>
-        </div>
-    </transition>
-</template>
-  
-<script>
-import { ref, toRef } from 'vue';
-import { useAuthStore } from '@/store/authStore';
-import { useClientStore } from '@/store/clienteStore';
+<script setup>
+import { ref, toRef } from 'vue'
+import { useAuthStore } from '@/store/authStore'
+import { useClientStore } from '@/store/clienteStore'
 
-export default {
-    setup(_, { emit }) {
-        const newClientName = ref('');
-        const authStore = useAuthStore();
-        const clientStore = useClientStore();
-        const userMasterData = toRef(authStore, "userMasterData");
-        const master_id       = userMasterData.value.id;
+const emit = defineEmits(['clientCreated', 'close'])
 
-        const addNewClient = async () => {
-            if (!newClientName.value.trim()) {
-                console.error('Por favor, ingresa un nombre para el cliente.');
-                return;
-            }
-            //Create Client
-            try {
-                if (master_id) {
-                    let clientCreated = await clientStore.createClient(newClientName.value, master_id);
-                    newClientName.value = '';
-                    
-                    emit('clientCreated', clientCreated);
-                    close();
-                }
-            } catch (error) {
-                console.error('Error al crear cliente[DIALOG]:', error);
-                alert('Hubo un error al crear el cliente.');
-            }
-        };
+const newClientName = ref('')
+const authStore = useAuthStore()
+const clientStore = useClientStore()
+const userMasterData = toRef(authStore, 'userMasterData')
+const master_id = userMasterData.value.id
 
-        const close = () => emit('close');
+const addNewClient = async () => {
+  if (!newClientName.value.trim()) {
+    console.error('Por favor, ingresa un nombre para el cliente.')
+    return
+  }
+  // Create Client
+  try {
+    if (master_id) {
+      const clientCreated = await clientStore.createClient(newClientName.value, master_id)
+      newClientName.value = ''
 
-        return { newClientName, addNewClient, close };
+      emit('clientCreated', clientCreated)
+      close()
     }
-};
+  } catch (error) {
+    console.error('Error al crear cliente[DIALOG]:', error)
+    alert('Hubo un error al crear el cliente.')
+  }
+}
+
+const close = () => emit('close')
 </script>
+
+<template>
+  <transition name="fade" appear>
+    <div class="dialog-overlay create-client-overlay" @click.self="close">
+      <div class="dialog create-client-dialog">
+        <header class="dialog-header">
+          <h3>Nuevo Cliente</h3>
+          <button class="close-button" @click="close">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </header>
+        <div class="dialog-body">
+          <input
+            v-model="newClientName"
+            type="text"
+            placeholder="Nombre del cliente"
+            class="input-client-name"
+            @keyup.enter="addNewClient"
+          />
+          <button class="button button-green" @click="addNewClient">Crear</button>
+        </div>
+      </div>
+    </div>
+  </transition>
+</template>
 
 <style scoped>
 .create-client-overlay {

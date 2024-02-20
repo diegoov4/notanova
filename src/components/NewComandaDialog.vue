@@ -1,3 +1,108 @@
+<script setup>
+import { ref, onMounted, toRef } from 'vue'
+import { useAuthStore } from '@/store/authStore'
+import { useCommonStore } from '@/store/commonStore'
+import { useClientStore } from '@/store/clienteStore'
+import { useComandaStore } from '@/store/comandaStore'
+import { useProductoStore } from '@/store/productoStore'
+
+const emit = defineEmits(['comanda-saved', 'close'])
+
+const authStore = useAuthStore()
+const commonStore = useCommonStore()
+const clientStore = useClientStore()
+const comandaStore = useComandaStore()
+const productStore = useProductoStore()
+const userMasterData = toRef(authStore, 'userMasterData')
+const clientes = toRef(clientStore, 'clientes')
+const productTypes = toRef(productStore, 'product_types')
+const master_id = userMasterData.value.id
+const created_by = userMasterData.value.responsable
+const selectedCliente = ref(null)
+const showCreateClientDialog = ref(false)
+const showDropdown = ref(false)
+const productosSeleccionados = ref([])
+const showProductSelection = ref(false)
+const optionsList = ref([])
+
+const fetchClients = async () => {
+  await clientStore.fetchClients(master_id)
+}
+const fetchProductos = async () => {
+  await productStore.fetchProductos(master_id)
+
+  optionsList.value = productTypes.value.map(type => ({
+    value: type.id,
+    description: `${type.categoria} > ${type.subcategoria}`,
+  }))
+}
+onMounted(() => {
+  fetchClients()
+  fetchProductos()
+})
+
+const clientCreated = cliente => {
+  selectedCliente.value = cliente
+  fetchClients()
+}
+
+const selectCliente = cliente => {
+  selectedCliente.value = cliente
+  showDropdown.value = false
+}
+
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value
+}
+
+const showProducts = selectedProducts => {
+  productosSeleccionados.value = selectedProducts
+  showProductSelection.value = false
+}
+
+const removeProduct = producto => {
+  productosSeleccionados.value = productosSeleccionados.value.filter(p => p.id !== producto.id)
+}
+
+const saveComanda = async () => {
+  // DMO: remove at least 1 product
+  if (!selectedCliente.value) {
+    // || productosSeleccionados.value.length === 0
+    alert('Por favor, seleccione al menos un cliente')
+    return
+  }
+
+  // Create Comanda
+  try {
+    if (master_id) {
+      await comandaStore.createComanda(
+        selectedCliente.value,
+        productosSeleccionados.value,
+        created_by,
+        master_id
+      )
+
+      emit('comanda-saved')
+      resetDialog()
+    } else {
+      throw new Error('La información del local no está disponible.')
+    }
+  } catch (error) {
+    console.error('Error al guardar la comanda:', error)
+    error.value = error.message || 'Ocurrió un error desconocido.'
+  }
+}
+
+// Restablecer estado y cerrar diálogo
+const resetDialog = () => {
+  productosSeleccionados.value = []
+  selectedCliente.value = null
+  showProductSelection.value = false
+  commonStore.setShowNewComandaDialog(false)
+  emit('close')
+}
+</script>
+
 <template>
   <div class="dialog-overlay" @click.self="resetDialog">
     <div class="dialog">
@@ -8,7 +113,6 @@
         </button>
       </header>
       <div class="dialog-body">
-
         <!-- Selector de cliente -->
         <div class="select-wrapper-client">
           <div class="select-display" @click="toggleDropdown">
@@ -17,7 +121,12 @@
           </div>
           <ul v-if="showDropdown" class="dropdown">
             <li v-if="clientes.length === 0" @click="selectCliente('Cliente')">[Sin clientes]</li>
-            <li v-else v-for="cliente in clientes" :key="cliente.id" @click="selectCliente(cliente)">
+            <li
+              v-for="cliente in clientes"
+              v-else
+              :key="cliente.id"
+              @click="selectCliente(cliente)"
+            >
               {{ cliente.nombre }}
             </li>
           </ul>
@@ -26,19 +135,27 @@
             <i class="fa-solid fa-plus fa-xs"></i>
           </button>
         </div>
-        <CreateClientDialog v-if="showCreateClientDialog" @close="showCreateClientDialog = false" @clientCreated="clientCreated" />
+        <CreateClientDialog
+          v-if="showCreateClientDialog"
+          @close="showCreateClientDialog = false"
+          @client-created="clientCreated"
+        />
 
         <!-- Lista de productos seleccionados -->
         <div class="selected-products">
-          <div v-for="producto in productosSeleccionados" :key="producto.id" class="selected-product">
+          <div
+            v-for="producto in productosSeleccionados"
+            :key="producto.id"
+            class="selected-product"
+          >
             <div class="product-image-container">
               <img :src="producto.images.url" :alt="producto.titulo" class="product-image" />
             </div>
             <div class="product-info">
               <div class="product-title">{{ producto.titulo }}</div>
               <div class="product-controls">
-                <input type="number" min="0" v-model="producto.cantidad" class="product-quantity" />
-                <button @click="removeProduct(producto)" class="remove-product-button">
+                <input v-model="producto.cantidad" type="number" min="0" class="product-quantity" />
+                <button class="remove-product-button" @click="removeProduct(producto)">
                   <i class="fas fa-trash-alt fa-xs"></i>
                 </button>
               </div>
@@ -49,8 +166,12 @@
         <button class="button" @click="showProductSelection = true">Añadir Productos</button>
 
         <!-- Dialog para selección de productos -->
-        <div class="product-dialog-container" v-if="showProductSelection">
-          <ProductSelectionDialog :options-list="optionsList" @selectedProducts="showProducts" @close="showProductSelection = false" />
+        <div v-if="showProductSelection" class="product-dialog-container">
+          <ProductSelectionDialog
+            :options-list="optionsList"
+            @selected-products="showProducts"
+            @close="showProductSelection = false"
+          />
         </div>
       </div>
       <footer class="dialog-footer">
@@ -59,133 +180,7 @@
     </div>
   </div>
 </template>
-  
-<script>
-import { ref, onMounted, toRef }  from 'vue';
-import { useAuthStore }           from '@/store/authStore';
-import { useCommonStore }         from '@/store/commonStore';
-import { useClientStore }         from '@/store/clienteStore';
-import { useComandaStore }        from '@/store/comandaStore';
-import { useProductoStore }       from '@/store/productoStore';
-import CreateClientDialog         from '@/components/CreateClientDialog.vue';
-import ProductSelectionDialog     from '@/components/ProductSelectionDialog.vue';
 
-export default {
-  components: {
-    CreateClientDialog,
-    ProductSelectionDialog
-  },
-  setup(_, { emit }) {
-    const authStore       = useAuthStore();
-    const commonStore     = useCommonStore();
-    const clientStore     = useClientStore();
-    const comandaStore    = useComandaStore();
-    const productStore    = useProductoStore();
-    const userMasterData  = toRef(authStore, "userMasterData");
-    const clientes        = toRef(clientStore, 'clientes');
-    const productTypes    = toRef(productStore, "product_types");
-    const master_id       = userMasterData.value.id;
-    const created_by      = userMasterData.value.responsable;
-    const selectedCliente         = ref(null);
-    const showCreateClientDialog  = ref(false);
-    const showDropdown            = ref(false);
-    const productosSeleccionados  = ref([]);
-    const showProductSelection    = ref(false);
-    const optionsList             = ref([]);
-
-    const fetchClients = async () => {
-      await clientStore.fetchClients(master_id);
-    };
-    const fetchProductos = async () => {
-        await productStore.fetchProductos(master_id);
-
-        optionsList.value = productTypes.value.map(type => ({
-            value: type.id,
-            description: `${type.categoria} > ${type.subcategoria}`
-        }));
-    };
-    onMounted(() => {
-      fetchClients();
-      fetchProductos();
-    });
-
-    const clientCreated = (cliente) => {
-      selectedCliente.value = cliente;
-      fetchClients();
-    }
-
-    const selectCliente = (cliente) => {
-      selectedCliente.value = cliente;
-      showDropdown.value = false;
-    };
-
-    const toggleDropdown = () => {
-      showDropdown.value = !showDropdown.value;
-    };
-
-    const showProducts = (selectedProducts) => {
-      productosSeleccionados.value = selectedProducts;
-      showProductSelection.value = false;
-    };
-
-    const removeProduct = (producto) => {
-      productosSeleccionados.value = productosSeleccionados.value.filter(p => p.id !== producto.id);
-    };
-
-    const saveComanda = async () => {
-
-      //DMO: remove at least 1 product
-      if (!selectedCliente.value) { //|| productosSeleccionados.value.length === 0
-        alert('Por favor, seleccione al menos un cliente');
-        return;
-      }
-
-      // Create Comanda
-      try {
-        if (master_id) {
-          await comandaStore.createComanda(selectedCliente.value, productosSeleccionados.value, created_by, master_id);
-
-          emit('comanda-saved');
-          resetDialog();
-        } else {
-          throw new Error('La información del local no está disponible.');
-        }
-      } catch (error) {
-        console.error('Error al guardar la comanda:', error);
-        error.value = error.message || 'Ocurrió un error desconocido.';
-      }
-    };
-
-    // Restablecer estado y cerrar diálogo
-    const resetDialog = () => {
-      productosSeleccionados.value = [];
-      selectedCliente.value = null;
-      showProductSelection.value = false;
-      commonStore.setShowNewComandaDialog(false);
-      emit('close');
-    };
-
-    return {
-      clientes,
-      selectedCliente,
-      showCreateClientDialog,
-      optionsList,
-      toggleDropdown,
-      showDropdown,
-      selectCliente,
-      clientCreated,
-      fetchClients,
-      productosSeleccionados,
-      showProductSelection,
-      showProducts,
-      removeProduct,
-      saveComanda,
-      resetDialog,
-    };
-  }
-};
-</script>
-  
 <style scoped>
 .product-dialog-container {
   position: absolute;
@@ -210,7 +205,7 @@ export default {
   align-items: center;
   margin-bottom: 1rem;
   background: #fff;
-  padding: .5rem;
+  padding: 0.5rem;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -305,4 +300,3 @@ export default {
   margin-left: 4px;
 }
 </style>
-  

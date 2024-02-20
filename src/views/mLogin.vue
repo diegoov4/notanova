@@ -1,12 +1,48 @@
+<script setup>
+import { ref } from 'vue'
+import { useAuthStore } from '@/store/authStore'
+import { supabase } from '@/services/supabase'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const email = ref('')
+const password = ref('')
+const error = ref('')
+
+const handleLogin = async () => {
+  const {
+    data: { user },
+    error: loginError,
+  } = await supabase.auth.signInWithPassword({
+    email: email.value,
+    password: password.value,
+  })
+
+  if (loginError) {
+    console.info('[LOGIN] Error: ', loginError.message)
+    error.value = 'Error de credenciales'
+  } else {
+    // Persist auth_user by 'local'
+    const isFetch = await authStore.fetchUserMasterData(user.email)
+    if (isFetch) {
+      authStore.setUser(user)
+      // Redirigimos al inicio
+      router.push({ name: 'LandingHome' })
+    }
+  }
+}
+</script>
+
 <template>
   <div class="login-container">
     <h1 class="title">Iniciar Sesión</h1>
     <form @submit.prevent="handleLogin">
       <div class="field">
-        <input type="email" id="email" v-model="email" required placeholder="Email" />
+        <input id="email" v-model="email" type="email" required placeholder="Email" />
       </div>
       <div class="field">
-        <input type="password" id="password" v-model="password" required placeholder="Contraseña" />
+        <input id="password" v-model="password" type="password" required placeholder="Contraseña" />
       </div>
       <div class="actions">
         <button type="submit" class="button button-green">ACCEDER</button>
@@ -15,52 +51,7 @@
     </form>
   </div>
 </template>
-  
-<script>
-import { ref } from 'vue';
-import { useAuthStore } from '@/store/authStore';
-import { supabase } from '@/services/supabase';
-import { useRouter } from 'vue-router';
 
-export default {
-  name: 'mLogin',
-  setup() {
-    const router    = useRouter()
-    const authStore = useAuthStore();
-    const email     = ref('');
-    const password  = ref('');
-    const error     = ref('');
-
-    const handleLogin = async () => {
-      const { data: { user }, error: loginError } = await supabase.auth.signInWithPassword({
-        email: email.value,
-        password: password.value,
-      });
-
-      if (loginError) {
-        console.log('[LOGIN] Error: ', loginError.message)
-        error.value = "Error de credenciales";
-      } else {
-        //Persist auth_user by 'local'
-        const isFetch = await authStore.fetchUserMasterData(user.email);
-        if(isFetch){
-          authStore.setUser(user);
-          //Redirigimos al inicio
-          router.push({ name: 'LandingHome' });
-        }
-      }
-    };
-
-    return {
-      email,
-      password,
-      error,
-      handleLogin,
-    };
-  },
-};
-</script>
-  
 <style scoped>
 .login-container {
   max-width: 400px;
