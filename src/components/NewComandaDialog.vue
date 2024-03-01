@@ -24,16 +24,23 @@ const showDropdown = ref(false)
 const productosSeleccionados = ref([])
 const showProductSelection = ref(false)
 const optionsList = ref([])
+const clientesList = ref([])
 
 const fetchClients = async () => {
   await clientStore.fetchClients(master_id)
+
+  clientesList.value = clientes.value.map(cl => ({
+    id: `${cl.id}`,
+    title: `${cl.nombre}`,
+  }))
+  console.log('[ClientesList] ', clientesList)
 }
 const fetchProductos = async () => {
   await productStore.fetchProductos(master_id)
 
   optionsList.value = productTypes.value.map(type => ({
-    value: type.id,
-    description: `${type.categoria} > ${type.subcategoria}`,
+    id: `${type.id}`,
+    title: `${type.categoria} > ${type.subcategoria}`,
   }))
 }
 onMounted(() => {
@@ -51,21 +58,16 @@ const selectCliente = cliente => {
   showDropdown.value = false
 }
 
-const toggleDropdown = () => {
-  showDropdown.value = !showDropdown.value
-}
-
 const showProducts = selectedProducts => {
   productosSeleccionados.value = selectedProducts
   showProductSelection.value = false
 }
 
-const removeProduct = producto => {
-  productosSeleccionados.value = productosSeleccionados.value.filter(p => p.id !== producto.id)
-}
+// const removeProduct = producto => {
+//   productosSeleccionados.value = productosSeleccionados.value.filter(p => p.id !== producto.id)
+// }
 
 const saveComanda = async () => {
-  // DMO: remove at least 1 product
   if (!selectedCliente.value) {
     // || productosSeleccionados.value.length === 0
     alert('Por favor, seleccione al menos un cliente')
@@ -104,199 +106,134 @@ const resetDialog = () => {
 </script>
 
 <template>
-  <div class="dialog-overlay" @click.self="resetDialog">
-    <div class="dialog">
-      <header class="dialog-header">
-        <h3>Nueva Comanda</h3>
-        <button class="close-button" @click="resetDialog">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </header>
-      <div class="dialog-body">
-        <!-- Selector de cliente -->
-        <div class="select-wrapper-client">
-          <div class="select-display" @click="toggleDropdown">
-            {{ selectedCliente?.nombre || 'Cliente' }}
-            <i class="fa-solid fa-caret-down caret"></i>
-          </div>
-          <ul v-if="showDropdown" class="dropdown">
-            <li v-if="clientes.length === 0" @click="selectCliente('Cliente')">[Sin clientes]</li>
-            <li
-              v-for="cliente in clientes"
-              v-else
-              :key="cliente.id"
-              @click="selectCliente(cliente)"
-            >
-              {{ cliente.nombre }}
-            </li>
-          </ul>
+  <v-dialog persistent max-width="600px" @click:outside="resetDialog">
+    <v-card class="pa-4 mb-4 rounded-lg">
+      <!-- Header -->
+      <v-card-title class="text-h5 d-flex justify-space-between align-center">
+        Nueva Comanda
+        <i-ph-x-bold @click="resetDialog" />
+      </v-card-title>
 
-          <button @click="showCreateClientDialog = true">
-            <i class="fa-solid fa-plus fa-xs"></i>
-          </button>
-        </div>
-        <CreateClientDialog
-          v-if="showCreateClientDialog"
-          @close="showCreateClientDialog = false"
-          @client-created="clientCreated"
-        />
+      <!-- <v-divider :thickness="1" color="primary"></v-divider> -->
 
-        <!-- Lista de productos seleccionados -->
-        <div class="selected-products">
-          <div
-            v-for="producto in productosSeleccionados"
-            :key="producto.id"
-            class="selected-product"
+      <!-- Selector-->
+      <v-card-item>
+        <!-- Row: Cliente y Mesa same line -->
+        <template #default>
+          <v-row no-gutters class="justify-center text-center">
+            <!-- Clientes -->
+            <v-col>
+              <v-sheet class="ma-2 pa-2">
+                <v-select
+                  v-model="selectedCliente"
+                  :items="clientesList"
+                  item-text="title"
+                  item-value="id"
+                  label="Cliente"
+                  placeholder="Seleccione Cliente"
+                  @change="selectCliente"
+                ></v-select>
+              </v-sheet>
+            </v-col>
+            <!-- Mesa -->
+            <v-col>
+              <v-sheet class="ma-2 pa-2">
+                <v-select
+                  v-model="selectedCliente"
+                  :items="clientesList"
+                  item-text="title"
+                  item-value="id"
+                  label="Mesa"
+                  placeholder="Seleccione Mesa"
+                  @change="selectCliente"
+                ></v-select>
+              </v-sheet>
+            </v-col>
+          </v-row>
+        </template>
+        <!-- Crear cliente -->
+        <template #append>
+          <v-btn
+            icon
+            color="primary"
+            class="mb-5"
+            :loading="showCreateClientDialog"
+            @click="showCreateClientDialog = true"
           >
-            <div class="product-image-container">
-              <img :src="producto.images.url" :alt="producto.titulo" class="product-image" />
-            </div>
-            <div class="product-info">
-              <div class="product-title">{{ producto.titulo }}</div>
-              <div class="product-controls">
-                <input v-model="producto.cantidad" type="number" min="0" class="product-quantity" />
-                <button class="remove-product-button" @click="removeProduct(producto)">
-                  <i class="fas fa-trash-alt fa-xs"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+            <i-ph-user-plus-duotone />
+          </v-btn>
+        </template>
+      </v-card-item>
 
-        <button class="button" @click="showProductSelection = true">Añadir Productos</button>
+      <v-divider :thickness="2" color="primary"></v-divider>
 
-        <!-- Dialog para selección de productos -->
-        <div v-if="showProductSelection" class="product-dialog-container">
-          <ProductSelectionDialog
-            :options-list="optionsList"
-            @selected-products="showProducts"
-            @close="showProductSelection = false"
-          />
-        </div>
-      </div>
-      <footer class="dialog-footer">
-        <button class="button button-green" @click="saveComanda">Guardar Comanda</button>
-      </footer>
-    </div>
-  </div>
+      <!-- Lista de productos seleccionados -->
+      <v-list lines="two" class="overflow-y-auto mh-31">
+        <v-list-item
+          v-for="producto in productosSeleccionados"
+          :key="producto.id"
+          :value="producto.id"
+          :title="producto.titulo"
+          :subtitle="producto.cantidad"
+          :prepend-avatar="producto.images.url"
+        >
+          <!-- Image Product -->
+          <!-- <template #prepend>
+            <v-avatar size="80" :image="producto.images.url" />
+          </template> -->
+          <!-- Desc. Product -->
+          <!-- <template #title>
+            {{ producto.titulo }}
+          </template> -->
+          <!-- Cantidad -->
+          <!-- <template #subtitle>
+            <div class="selector-cantidad pl-6">
+            <v-text-field variant="plain">
+              {{ producto.cantidad }}
+            </v-text-field>
+            </div>
+          </template> -->
+        </v-list-item>
+      </v-list>
+
+      <!-- Footer. Editar comanda y Productos -->
+      <v-card-actions class="d-flex justify-space-between align-center">
+        <v-btn
+          variant="elevated"
+          color="secondary"
+          :loading="showProductSelection"
+          @click="showProductSelection = true"
+        >
+          <i-ph-shopping-cart-bold class="mr-2" />
+          Productos
+        </v-btn>
+
+        <v-btn
+          variant="elevated"
+          color="primary"
+          class="pa-2"
+          :loading="showProductSelection"
+          @click="saveComanda"
+        >
+          <i-mdi-content-save-edit-outline class="mr-2" />
+          Crear Comanda
+        </v-btn>
+      </v-card-actions>
+
+      <!-- Dialogo Selección Productos -->
+      <ProductSelectionDialog
+        v-model="showProductSelection"
+        :options-list="optionsList"
+        @selected-products="showProducts"
+        @close="showProductSelection = false"
+      />
+
+      <!-- Dialogo Clientes -->
+      <CreateClientDialog
+        v-model="showCreateClientDialog"
+        @client-created="clientCreated"
+        @close="showCreateClientDialog = false"
+      />
+    </v-card>
+  </v-dialog>
 </template>
-
-<style scoped>
-.product-dialog-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 90rem;
-  transform: translateX(-50%);
-  z-index: 105;
-}
-
-.selected-products {
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  padding: 0.5rem;
-  max-height: 150px;
-  overflow-y: auto;
-  margin-top: 10px;
-}
-
-.selected-product {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-  background: #fff;
-  padding: 0.5rem;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.product-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.product-title {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.product-controls {
-  display: flex;
-  align-items: center;
-}
-
-.remove-product-button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  margin-left: 1rem;
-}
-
-.remove-product-button:before {
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.select-wrapper-client {
-  display: flex;
-  align-items: center;
-  padding: 5px;
-  border-radius: 25px;
-  position: relative;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.select-wrapper-client button {
-  padding: 8px 16px;
-  border-radius: 25px;
-  border: none;
-  cursor: pointer;
-  background-color: #f0f0f0;
-  color: #007651;
-  margin-left: 10px;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-}
-
-.select-display {
-  flex-grow: 1;
-  padding: 10px;
-  color: white;
-  cursor: pointer;
-  background-color: #fff;
-  color: #333;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.dropdown {
-  position: absolute;
-  background-color: white;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-radius: 0 0 25px 25px;
-  z-index: 10;
-}
-
-.dropdown li {
-  padding: 10px;
-  cursor: pointer;
-  border-radius: 25px;
-  background-color: #f0f0f0;
-}
-
-.dropdown li:hover {
-  background-color: #007651b0;
-  color: white;
-}
-
-.caret {
-  float: right;
-  margin-left: 4px;
-}
-</style>

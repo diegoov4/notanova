@@ -40,25 +40,25 @@ const selectComanda = comandaId => {
 </script>
 
 <template>
-  <section class="home">
-    <h1 class="titulo-comandas">Comandas Activas</h1>
-    <div class="comandas-list">
-      <div
-        v-for="comanda in comandas"
-        :key="comanda.id"
-        class="comanda-item"
-        @click="selectComanda(comanda.id)"
-      >
-        <div class="comanda-content">
-          <h2>{{ comanda.clientes.nombre || 'Cliente Desconocido' }}</h2>
-          <p>
+  <v-container fluid>
+    <v-row>
+      <v-col v-for="comanda in comandas" :key="comanda.id" cols="auto" sm="6" md="4" lg="4">
+        <v-card class="pa-16 card-bg-image" hover @click="selectComanda(comanda.id)">
+          <v-card-title
+            class="pt-8 pb-10 text-h4 text-center font-weight-bold text-capitalize text-blue-grey-darken-3"
+          >
+            {{ comanda.clientes.nombre || 'Cliente Desconocido' }}
+          </v-card-title>
+          <v-card-text class="text-h5 text-center text-grey-darken-3">
             Total:
-            <span class="comanda-total-price">{{ formatCurrency(comanda?.total) || '0 €' }}</span>
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
+            <span class="text-h4 font-weight-bold text-secondary">
+              {{ formatCurrency(comanda?.total) || '0 €' }}
+            </span>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
   <!-- Dialogo para nueva comanda -->
-  <NewComandaDialog v-show="checkDialog" @close="closeDialog" @comanda-saved="fetchComandas" />
+  <NewComandaDialog v-model="checkDialog" @close="closeDialog" @comanda-saved="fetchComandas" />
 </template>

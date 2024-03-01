@@ -24,55 +24,55 @@ const fetchImages = async () => {
 
 onMounted(fetchImages)
 
-const close = () => emit('close')
-
 // Computed filter for image types
 const filteredImages = computed(() => {
   let filterImg = images.value
   if (selectedType.value) {
     filterImg = images.value.filter(
-      image => image.product_types && image.product_types.id === selectedType.value.value
+      image => image.product_types && image.product_types.id === parseInt(selectedType.value, 10)
     )
   }
   return filterImg
 })
+
+const close = () => {
+  selectedType.value = ''
+  emit('close')
+}
 </script>
 
 <template>
-  <div class="dialog-overlay" @click.self="close">
-    <div class="dialog">
+  <v-dialog max-width="420" @click.self="close">
+    <v-card class="pa-4 mb-4 rounded-lg">
       <!-- Type Filter -->
-      <div class="filter-container">
-        <v-select
-          v-model="selectedType"
-          class="type-filter"
-          :options="optionsList"
-          label="description"
-          placeholder="Tipo de producto"
-        />
-      </div>
-      <ul class="products-picker image-list">
-        <li
+      <v-select
+        v-model="selectedType"
+        :items="optionsList"
+        item-text="title"
+        item-value="id"
+        placeholder="Seleccione tipo"
+        label="Tipo de producto"
+      ></v-select>
+      <v-list lines="two">
+        <v-list-item
           v-for="image in filteredImages"
           :key="image.id"
-          class="product-item"
+          :subtitle="image.titulo"
           @click="selectImage(image)"
         >
-          <div class="product-image-container">
-            <img class="product-image" :src="image.url" :alt="image.titulo" />
-          </div>
-          <span>{{ image.titulo }}</span>
-        </li>
-      </ul>
-      <footer class="dialog-footer">
-        <button class="button button-green" @click="close">Cerrar</button>
-      </footer>
-    </div>
-  </div>
-</template>
+          <!-- Image Product -->
+          <template #prepend>
+            <v-avatar size="60" :image="image.url" :alt="image.titulo" />
+          </template>
+        </v-list-item>
+      </v-list>
 
-<style scoped>
-.image-list .product-item {
-  border-bottom: 1px solid #d3d3d3;
-}
-</style>
+      <v-divider color="primary"></v-divider>
+
+      <!-- Footer -->
+      <v-card-actions>
+        <v-btn variant="elevated" color="error" @click="close">Cerrar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+</template>

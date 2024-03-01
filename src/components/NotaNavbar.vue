@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/authStore'
 import { useCommonStore } from '@/store/commonStore'
@@ -7,6 +8,7 @@ import { supabase } from '@/services/supabase'
 const authStore = useAuthStore()
 const commonStore = useCommonStore()
 const router = useRouter()
+const menuOpen = ref(false)
 
 const openDialog = () => {
   goToLandingHome()
@@ -14,6 +16,7 @@ const openDialog = () => {
 }
 
 const logout = async () => {
+  menuOpen.value = false
   await supabase.auth.signOut()
   authStore.clearUser()
   commonStore.clearData()
@@ -28,87 +31,48 @@ const auth_user = authStore.auth_user
 </script>
 
 <template>
-  <nav class="navbar">
-    <div class="logo">
+  <v-app-bar app>
+    <template #prepend>
       <img
-        src="@/assets/logo_final.png"
-        class="home-button"
+        src="@/assets/header_logo.png"
         alt="NotaNova Logo"
+        class="home-button"
+        style="max-height: 64px; max-width: 64px; cursor: pointer"
         @click="goToLandingHome"
       />
-    </div>
-    <div class="navbar-menu">
-      <button class="button button-green" @click="openDialog">+ Comanda</button>
-      <router-link to="/productos" class="navbar-item">Productos</router-link>
-      <router-link to="/clientes" class="navbar-item">Clientes</router-link>
-      <router-link to="/mesas" class="navbar-item">Mesas</router-link>
-    </div>
-    <div class="navbar-end">
-      <span class="navbar-item">{{ auth_user?.email }}</span>
-      <i-mdi-logout class="logout-button" @click="logout" />
-      <!-- <i class="fa-solid fa-arrow-right-from-bracket logout-button" @click="logout"></i> -->
-    </div>
-  </nav>
+    </template>
+
+    <v-app-bar-title class="ml-10">
+      <v-btn variant="elevated" class="text-h6 text-uppercase" color="primary" @click="openDialog">
+        <i-ph-plus-square-bold class="mr-1" />
+        Comanda
+      </v-btn>
+    </v-app-bar-title>
+
+    <!-- spacer to align right -->
+    <v-spacer></v-spacer>
+
+    <!-- Navigation links -->
+    <v-btn text to="/productos">Productos</v-btn>
+    <v-btn text to="/clientes">Clientes</v-btn>
+    <v-btn text to="/mesas">Mesas</v-btn>
+
+    <!-- User and logout -->
+    <v-menu>
+      <template #activator="{ props }">
+        <v-btn text v-bind="props">
+          {{ auth_user?.email }}
+          <i-mdi-chevron-down />
+        </v-btn>
+      </template>
+
+      <v-list>
+        <v-list-item link :title="'Cerrar Sesión'" @click="logout">
+          <template #append>
+            <i-ph-sign-out-duotone class="text-error text-h6" />
+          </template>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+  </v-app-bar>
 </template>
-
-<style scoped>
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 2rem;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: #333;
-  z-index: 1000;
-}
-
-.navbar-menu {
-  display: flex;
-}
-
-.navbar-item {
-  padding: 0.75rem 1rem;
-  margin: 0 0.5rem;
-  background-color: transparent;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  color: #333;
-  transition: background-color 0.3s;
-}
-
-.navbar-item:hover {
-  background-color: #f2f2f2;
-  text-decoration: none;
-}
-
-.navbar-end {
-  display: flex;
-  align-items: center;
-}
-.logo {
-  cursor: pointer;
-  font-size: 1.5rem;
-  height: 25px;
-}
-/* ----------------------------------------------------------------- */
-/*                      LOGOUT BUTTON                                */
-/* ----------------------------------------------------------------- */
-.logout-button {
-  cursor: pointer;
-  font-size: 1.5rem;
-  margin-left: 1rem;
-  color: #410000;
-  height: 25px;
-}
-
-.logout-button:hover {
-  color: #da2911;
-}
-
-/* Estilo para los íconos si usas FontAwesome o similar */
-.icon {
-  transition: color 0.3s ease;
-}
-</style>

@@ -230,7 +230,6 @@ export const useComandaStore = defineStore('comanda', {
     },
 
     async closeComanda(id_comanda) {
-      // DMO: v.2 Añadir historico
       const now = new Date().toISOString()
 
       const { error } = await supabase

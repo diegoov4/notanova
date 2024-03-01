@@ -1,38 +1,19 @@
 <script setup>
 import { ref, computed, onMounted, toRef } from 'vue'
-// import { useAuthStore } from '@/store/authStore';
 import { useProductoStore } from '@/store/productoStore'
 
 defineProps({
   optionsList: Array,
 })
-const emit = defineEmits(['selectedProducts', 'close'])
+const emit = defineEmits(['update:modelValue', 'selected-products'])
 
-// const authStore         = useAuthStore();
 const productoStore = useProductoStore()
-// const userMasterData    = toRef(authStore, "userMasterData");
 const availableProducts = toRef(productoStore, 'productos')
-// const master_id         = userMasterData.value.id;
 const selectedType = ref('')
-// const optionsList       = ref([]);
-// const selectedProducts = ref([])
-
-// const fetchProductos = async () => {
-//   if (master_id) {
-//     await productoStore.fetchProductos(master_id);
-//     console.log['[availableProducts]', availableProducts];
-
-//     optionsList.value = availableProducts.value.map(type => ({
-//       value: type.id,
-//       description: `${type.categoria} > ${type.subcategoria}`
-//     }));
-//   } else {
-//     console.error('User Master ID is not available or is not in the expected format');
-//   }
-// };
 
 // Reset 'cantidad' to 0 for new products
 const resetCantidad = () => {
+  selectedType.value = ''
   availableProducts.value = availableProducts.value.map(product => ({
     ...product,
     cantidad: 0,
@@ -51,7 +32,7 @@ const confirmSelection = () => {
       precio: product.precio,
     }))
 
-  emit('selectedProducts', selected)
+  emit('selected-products', selected)
   close()
 }
 
@@ -59,7 +40,7 @@ const confirmSelection = () => {
 const filteredProducts = computed(() => {
   if (selectedType.value) {
     return availableProducts.value.filter(producto => {
-      return producto.images.product_types.id === selectedType.value.value
+      return producto.images.product_types.id === parseInt(selectedType.value, 10)
     })
   }
   return availableProducts.value
@@ -84,49 +65,85 @@ const decrement = product => {
   }
 }
 
-const close = () => emit('close')
+function close() {
+  resetCantidad()
+  emit('update:modelValue', false)
+}
 </script>
 
 <template>
-  <div class="dialog-overlay dialog-products-overlay" @click.self="close">
-    <div class="dialog">
+  <v-dialog max-width="600px" @click:outside="close">
+    <v-card class="pa-4 mb-4 rounded-lg">
       <!-- Header -->
-      <header class="dialog-header">
-        <h3>Seleccionar Productos</h3>
-        <button class="close-button" @click="close">X</button>
-      </header>
+      <v-card-title class="d-flex justify-space-between align-center">
+        Seleccionar Productos
+        <i-ph-x-bold @click="close" />
+      </v-card-title>
+
       <!-- Filter Type -->
-      <div class="filter-container">
-        <v-select
-          v-model="selectedType"
-          class="type-filter"
-          :options="optionsList"
-          label="description"
-          placeholder="Tipo de producto"
-        />
-      </div>
+      <v-select
+        v-model="selectedType"
+        :items="optionsList"
+        item-text="title"
+        item-value="id"
+        placeholder="Seleccione tipo"
+        label="Tipo de producto"
+      ></v-select>
+
+      <v-divider color="primary"></v-divider>
+
       <!-- Product Picker -->
-      <ul class="products-picker">
-        <li v-for="product in filteredProducts" :key="product.id" class="product-item">
-          <div class="product-image-container">
-            <img :src="product.images.url" class="product-image" :alt="product.titulo" />
-          </div>
-          <div class="product-details">
-            <div class="product-title">
-              {{ product.titulo }} |
-              <span class="price">{{ formatCurrency(product.precio) }}</span>
+      <v-list lines="two">
+        <v-list-item v-for="product in filteredProducts" :key="product.id">
+          <!-- Image Product -->
+          <template #prepend>
+            <v-avatar size="70" :image="product.images.url" :alt="product.titulo" />
+          </template>
+          <!-- Desc. Product -->
+          <template #title>
+            <span class="text-h6">
+              {{ product.titulo }}
+            </span>
+            |
+            <span class="text-h6 text-primary font-weight-bold">
+              {{ formatCurrency(product.precio) }}
+            </span>
+          </template>
+          <!-- Cantidad -->
+          <template #subtitle>
+            <div class="selector-cantidad pl-6">
+              <v-text-field variant="plain">
+                <template #prepend>
+                  <v-btn color="#c7c7c7" icon @click="decrement(product)">
+                    <i-ph-minus-bold />
+                  </v-btn>
+                </template>
+                <div class="cantidad">
+                  {{ product.cantidad }}
+                </div>
+
+                <template #append>
+                  <v-btn color="#c7c7c7" icon @click="increment(product)">
+                    <i-ph-plus-bold />
+                  </v-btn>
+                </template>
+              </v-text-field>
             </div>
-            <div class="number-input">
-              <button @click="decrement(product)">-</button>
-              <input v-model.number="product.cantidad" min="0" type="number" />
-              <button @click="increment(product)">+</button>
-            </div>
-          </div>
-        </li>
-      </ul>
-      <footer class="dialog-footer">
-        <button class="button button-green" @click="confirmSelection">Confirmar</button>
-      </footer>
-    </div>
-  </div>
+          </template>
+        </v-list-item>
+      </v-list>
+
+      <!-- Footer -->
+      <v-card-actions>
+        <v-btn variant="elevated" color="primary" @click="confirmSelection">Confirmar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
+
+<style scoped>
+.cantidad {
+  font-size: 2.2rem;
+  padding-left: 2.25rem;
+}
+</style>

@@ -16,6 +16,10 @@ const comanda = toRef(comandaStore, 'comanda')
 const master_id = userMasterData.value.id
 const showProductSelection = ref(false)
 const optionsList = ref([])
+const showConfirmDialog = ref(false)
+const titleToConfirmDialog = ref('')
+const textToConfirmDialog = ref('')
+const confirmAction = ref(null)
 
 const fetchComandaById = async () => {
   if (route.params.id) {
@@ -30,8 +34,8 @@ const fetchProductos = async () => {
   await productStore.fetchProductos(master_id)
 
   optionsList.value = productTypes.value.map(type => ({
-    value: type.id,
-    description: `${type.categoria} > ${type.subcategoria}`,
+    id: `${type.id}`,
+    title: `${type.categoria} > ${type.subcategoria}`,
   }))
 }
 onMounted(() => {
@@ -109,12 +113,37 @@ const goToLandingHome = () => {
   router.push({ name: 'LandingHome' })
 }
 
-const cerrarComanda = async () => {
-  // Primero confirmamos si quiere pagar
-  if (!confirm(`¿Quieres cobrar y cerrar la comanda?`)) {
-    return
+// ####################
+// Confirm Dialogs
+// ####################
+const promptCerrarComanda = () => {
+  titleToConfirmDialog.value = 'Cerrar Comanda'
+  textToConfirmDialog.value = `¿Quieres cobrar y cerrar la comanda?`
+  confirmAction.value = cerrarComanda
+  showConfirmDialog.value = true
+}
+
+const promptDeleteProducto = producto => {
+  titleToConfirmDialog.value = `Eliminar ${producto.producto.titulo}`
+  textToConfirmDialog.value = `¿Estás seguro de que deseas eliminar "${producto.producto.titulo}" de la comanda?`
+  confirmAction.value = () => eliminarProducto(producto)
+  showConfirmDialog.value = true
+}
+
+const confirmAndReset = () => {
+  if (confirmAction.value) {
+    // Ejecuta la acción confirmada
+    confirmAction.value()
   }
-  // Cerramos comanda
+  resetConfirmDialog()
+}
+
+const resetConfirmDialog = () => {
+  showConfirmDialog.value = false
+  confirmAction.value = null // Limpia la acción confirmada
+}
+
+const cerrarComanda = async () => {
   const cerrado = await comandaStore.closeComanda(comanda.value.id)
   if (!cerrado) {
     alert('Ha habido un error al cerrar la comanda. Contacte con el administrador')
@@ -124,145 +153,115 @@ const cerrarComanda = async () => {
 }
 
 const eliminarProducto = async producto => {
-  console.info('EliminarProducto: ', producto)
-  if (!confirm(`¿Estás seguro de que deseas eliminar "${producto.titulo}" de la comanda?`)) {
-    return
-  }
-  await comandaStore.deleteProducto(comanda.value.id, producto.id)
+  console.info('[EliminarProducto]: ', producto)
+  await comandaStore.deleteProducto(comanda.value.id, producto.producto.id)
 }
 </script>
 
 <template>
-  <div class="comanda-detail-container">
+  <v-container>
     <!-- Cabecera Comanda -->
-    <header class="comanda-header">
-      <h2 class="comanda-title">{{ comanda?.clientes.nombre || 'Cliente Desconocido' }}</h2>
-      <p class="comanda-total">
-        Total:
-        <span class="comanda-total-price" @click="cerrarComanda">
-          {{ formatCurrency(comanda?.total) || '0 €' }}
+    <v-card class="pa-4 mb-4 rounded-lg">
+      <v-card-title class="d-flex justify-space-between align-center">
+        <span class="text-h4 text-capitalize">{{ comanda?.clientes.nombre }}</span>
+        <span class="text-h5 text-right text-grey-darken-3">
+          Total:
+          <span
+            class="text-h7 font-weight-bold text-secondary"
+            style="cursor: pointer"
+            @click="promptCerrarComanda"
+          >
+            {{ formatCurrency(comanda?.total) || '0 €' }}
+          </span>
         </span>
-      </p>
-    </header>
+      </v-card-title>
 
-    <!-- Listado de Productos -->
-    <section class="pedido-section">
-      <ul class="pedido-list">
-        <li
-          v-for="producto_b in comanda?.comandas_productos"
-          :key="producto_b.id"
-          class="pedido-item"
-        >
-          <div class="product-image-container">
-            <img
-              :src="producto_b.producto.images.url"
-              class="product-image"
-              :alt="producto_b.producto.titulo"
-            />
-          </div>
-          <div class="pedido-info">
-            <span class="pedido-nombre">{{ producto_b.producto.titulo }}</span>
-            <div class="number-input">
-              <button @click="decrement(producto_b)">-</button>
-              <input v-model.number="producto_b.cantidad" min="0" type="number" />
-              <button @click="increment(producto_b)">+</button>
+      <v-divider color="primary"></v-divider>
+
+      <!-- Listado de Productos -->
+      <v-list lines="two" class="overflow-y-auto mh-40">
+        <v-list-item v-for="producto_b in comanda?.comandas_productos" :key="producto_b.id">
+          <!-- Image Product -->
+          <template #prepend>
+            <v-avatar size="110" :image="producto_b.producto.images.url" />
+          </template>
+          <!-- Desc. Product -->
+          <template #title>
+            <span class="text-h5">
+              {{ producto_b.producto.titulo }}
+            </span>
+          </template>
+          <!-- Cantidad -->
+          <template #subtitle>
+            <div class="selector-cantidad pl-6">
+              <v-text-field variant="plain">
+                <template #prepend>
+                  <v-btn color="#c7c7c7" icon @click="decrement(producto_b)">
+                    <i-ph-minus-bold />
+                  </v-btn>
+                </template>
+                <div class="cantidad">
+                  {{ producto_b.cantidad }}
+                </div>
+
+                <template #append>
+                  <v-btn color="#c7c7c7" icon @click="increment(producto_b)">
+                    <i-ph-plus-bold />
+                  </v-btn>
+                </template>
+              </v-text-field>
             </div>
-          </div>
-          <button class="button button-red" @click="eliminarProducto(producto_b.producto)">
-            ×
-          </button>
-        </li>
-      </ul>
-    </section>
+          </template>
+          <!-- Delete Product -->
+          <template #append>
+            <v-btn
+              stacked
+              size="40"
+              class="ml-16"
+              color="error"
+              @click="promptDeleteProducto(producto_b)"
+            >
+              <i-ph-trash-duotone />
+            </v-btn>
+          </template>
+        </v-list-item>
+      </v-list>
 
-    <!-- Dialogo Selección Productos -->
-    <div v-if="showProductSelection" class="product-dialog-container">
+      <!-- Footer. Editar comanda y Productos -->
+      <v-card-actions>
+        <v-btn
+          variant="elevated"
+          color="secondary"
+          :loading="showProductSelection"
+          @click="showProductSelection = true"
+        >
+          Productos
+        </v-btn>
+        <!-- <v-btn variant="elevated" color="primary" @click="updateComanda">Guardar</v-btn> -->
+        <v-spacer></v-spacer>
+        <v-btn variant="elevated" color="grey" @click="goToLandingHome">Salir</v-btn>
+      </v-card-actions>
+
+      <!-- Dialogo Selección Productos -->
       <ProductSelectionDialog
+        v-model="showProductSelection"
         :options-list="optionsList"
         @selected-products="showProducts"
         @close="showProductSelection = false"
       />
-    </div>
-
-    <!-- Footer. Editar comanda y Cerrar (pagar) -->
-    <footer class="comanda-footer">
-      <div class="edit-buttons">
-        <button class="button button-yellow" @click="showProductSelection = true">Productos</button>
-        <button class="button button-green" @click="updateComanda">Guardar</button>
-      </div>
-      <button class="button button-salir" @click="goToLandingHome">Salir</button>
-    </footer>
-  </div>
+      <!-- ############## -->
+      <!-- Confirm Dialog -->
+      <v-dialog v-model="showConfirmDialog" persistent max-width="300px">
+        <v-card>
+          <v-card-title class="text-h5">{{ titleToConfirmDialog }}</v-card-title>
+          <v-card-text>{{ textToConfirmDialog }}</v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="error darken-1" text @click="resetConfirmDialog">Cancelar</v-btn>
+            <v-btn color="primary darken-1" text @click="confirmAndReset">Confirmar</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-card>
+  </v-container>
 </template>
-
-<style scoped>
-.comanda-detail-container {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 1rem;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.comanda-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1rem;
-}
-
-.comanda-title {
-  font-size: 1.75rem;
-  margin-right: auto;
-  color: #333;
-}
-
-.comanda-total {
-  font-size: 1.25rem;
-  margin-left: auto;
-  color: #333;
-}
-
-.comanda-total .comanda-total-price {
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.product-image-container {
-  flex-shrink: 0;
-}
-
-.product-image {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-}
-
-.pedido-info {
-  padding: 0.5rem;
-  flex-grow: 1;
-}
-
-.pedido-nombre {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-}
-
-.comanda-footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2rem;
-}
-
-/* Expandimos los botones por todo el footer */
-/* .comanda-footer button {
-    flex-grow: 1;
-    margin: 0 5px;
-} */
-.comanda-footer .edit-buttons button {
-  margin: 0 12px 0 0;
-}
-</style>

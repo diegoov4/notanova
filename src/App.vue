@@ -8,17 +8,13 @@ const showNewComandaDialog = false
 </script>
 
 <template>
-  <div id="app">
+  <!-- Config the App Layout directly here  -->
+  <v-layout class="rounded rounded-md">
+    <!-- Header of App-->
     <Navbar v-if="authStore.isAuthenticated" @open-dialog="showNewComandaDialog = true" />
-    <main
-      class="main"
-      :class="{
-        'with-navbar': authStore.isAuthenticated,
-        'without-navbar': !authStore.isAuthenticated,
-      }"
-    >
+    <!-- Main of App -->
+    <v-main class="d-flex align-center justify-center bg-image" style="min-height: 300px">
       <router-view />
-    </main>
-    <!-- <Footer v-if="isAuthenticated" /> -->
-  </div>
+    </v-main>
+  </v-layout>
 </template>
