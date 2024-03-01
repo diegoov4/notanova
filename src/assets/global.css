@@ -39,6 +39,7 @@ img {
 /* Comanda BG IMG */
 .card-bg-image {
   background: url('@/assets/hoja-comanda.png') top center no-repeat !important;
+  background-size: contain;
   height: 27rem;
   width: auto;
 }
@@ -74,52 +75,14 @@ img {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* *************************** */
-/*           CAROUSEL   [DMO:BORRAR]       */
-/* *************************** */
-.activeClasses {
-  margin-top: 4rem;
-  .carousel__item p {
-    color: #fdda00;
-    font-weight: bold;
-  }
-  .carousel__slide {
-    padding: 5;
-  }
 
-  .carousel__viewport {
-    perspective: 2000px;
-  }
+/* ############################### */
+/*            Responsive           */
+/* ############################### */
 
-  .carousel__track {
-    transform-style: preserve-3d;
-  }
-
-  .carousel__slide--sliding {
-    transition: 0.5s;
-  }
-
-  .carousel__slide {
-    opacity: 0.9;
-    transform: rotateY(-20deg) scale(0.9);
-  }
-
-  .carousel__slide--active ~ .carousel__slide {
-    transform: rotateY(20deg) scale(0.9);
-  }
-
-  .carousel__slide--prev {
-    opacity: 1;
-    transform: rotateY(-10deg) scale(0.95);
-  }
-
-  .carousel__slide.carousel__slide--next {
-    opacity: 1;
-    transform: rotateY(10deg) scale(0.95);
-  }
-
-  .carousel__slide--active {
-    opacity: 1;
-    transform: rotateY(0) scale(1);
+/* Mobile screen */
+@media (max-width: 600px) {
+  .card-bg-image {
+    background-size: cover;
   }
 }

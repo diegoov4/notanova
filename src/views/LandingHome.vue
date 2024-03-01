@@ -42,7 +42,7 @@ const selectComanda = comandaId => {
 <template>
   <v-container fluid>
     <v-row>
-      <v-col v-for="comanda in comandas" :key="comanda.id" cols="auto" sm="6" md="4" lg="4">
+      <v-col v-for="comanda in comandas" :key="comanda.id" cols="12" sm="6" md="4" lg="4">
         <v-card class="pa-16 card-bg-image" hover @click="selectComanda(comanda.id)">
           <v-card-title
             class="pt-8 pb-10 text-h4 text-center font-weight-bold text-capitalize text-blue-grey-darken-3"

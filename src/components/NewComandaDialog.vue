@@ -135,6 +135,7 @@ const resetDialog = () => {
                 ></v-select>
               </v-sheet>
             </v-col>
+
             <!-- Mesa -->
             <v-col>
               <v-sheet class="ma-2 pa-2">
