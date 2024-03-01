@@ -57,7 +57,7 @@ const deleteCliente = async () => {
         <v-list-item v-for="cliente in clientes" :key="cliente.id">
           <!-- Client avatar (standard) -->
           <template #prepend>
-            <!-- <v-avatar size="70" image="src/assets/header_logo.png" alt="cliente" /> -->
+            <!-- <v-avatar size="70" image="@/assets/header_logo.png" alt="cliente" /> -->
             <v-btn icon size="70" class="mr-6" color="grey">
               <i-mdi-card-account-details />
             </v-btn>

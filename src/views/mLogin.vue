@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/services/supabase'
 import { useRouter } from 'vue-router'
+import headerLogo from '@/assets/header_logo2.png'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -42,8 +43,11 @@ const handleLogin = async () => {
   <v-container>
     <v-card class="mx-auto pt-4 pb-14 rounded-lg" max-width="500">
       <v-card-title class="d-flex align-center mb-5">
-        <v-avatar size="95" image="src/assets/header_logo2.png" />
-        <span class="text-h3 text-uppercase text-grey-darken-3 ml-8">NotaNova</span>
+        <v-avatar class="responsive-avatar" :image="headerLogo" />
+        <span class="text-h3 text-uppercase text-grey-darken-3 ml-8 d-none d-sm-flex">
+          NotaNova
+        </span>
+        <span class="text-h5 text-uppercase text-grey-darken-3 ml-8 d-sm-none">NotaNova</span>
       </v-card-title>
 
       <v-text-field v-model="email" class="ml-8 mr-8" label="Email" variant="outlined">
@@ -92,41 +96,16 @@ const handleLogin = async () => {
   </v-container>
 </template>
 
-<!-- <template>
-  <v-container class="fill-height" fluid>
-    <v-row justify="center" align="center">
-      <v-col cols="12" sm="8" md="6" lg="5">
-        <v-card class="elevation-12" outlined>
-          <v-toolbar color="transparent" flat>
-            <v-toolbar-title>Iniciar Sesión</v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-form @submit.prevent="handleLogin">
-              <v-text-field
-                v-model="email"
-                label="Email"
-                type="email"
-                required
-                :rules="[v => !!v || 'E-mail es requerido']"
-              ></v-text-field>
-              <v-text-field
-                v-model="password"
-                label="Contraseña"
-                type="password"
-                required
-                :rules="[v => !!v || 'Contraseña es requerida']"
-              ></v-text-field>
-              <v-alert v-if="error" type="error" :value="true" dismissible>
-                {{ error }}
-              </v-alert>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="primary" type="submit" block>ACCEDER</v-btn>
-              </v-card-actions>
-            </v-form>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
-</template> -->
+<style scoped>
+.responsive-avatar {
+  width: 95px;
+  height: 95px;
+}
+
+@media (max-width: 600px) {
+  .responsive-avatar {
+    width: 60px;
+    height: 60px;
+  }
+}
+</style>
