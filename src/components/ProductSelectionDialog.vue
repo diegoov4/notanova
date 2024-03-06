@@ -97,7 +97,7 @@ function close() {
         <v-list-item v-for="product in filteredProducts" :key="product.id">
           <!-- Image Product -->
           <template #prepend>
-            <v-avatar size="70" :image="product.images.url" :alt="product.titulo" />
+            <v-avatar size="80" :image="product.images.url" :alt="product.titulo" />
           </template>
           <!-- Desc. Product -->
           <template #title>
@@ -114,7 +114,23 @@ function close() {
             <div class="selector-cantidad pl-6">
               <v-text-field variant="plain">
                 <template #prepend>
-                  <v-btn color="#c7c7c7" icon @click="decrement(product)">
+                  <!-- Uses classes to responsive mode -->
+                  <v-btn
+                    color="#c7c7c7"
+                    class="d-none d-sm-flex"
+                    size="55"
+                    icon
+                    @click="decrement(product)"
+                  >
+                    <i-ph-minus-bold />
+                  </v-btn>
+                  <v-btn
+                    color="#c7c7c7"
+                    class="d-sm-none"
+                    size="50"
+                    icon
+                    @click="decrement(product)"
+                  >
                     <i-ph-minus-bold />
                   </v-btn>
                 </template>
@@ -123,7 +139,22 @@ function close() {
                 </div>
 
                 <template #append>
-                  <v-btn color="#c7c7c7" icon @click="increment(product)">
+                  <v-btn
+                    color="#c7c7c7"
+                    class="d-none d-sm-flex"
+                    size="55"
+                    icon
+                    @click="increment(product)"
+                  >
+                    <i-ph-plus-bold />
+                  </v-btn>
+                  <v-btn
+                    color="#c7c7c7"
+                    class="ml-4 d-sm-none"
+                    size="50"
+                    icon
+                    @click="increment(product)"
+                  >
                     <i-ph-plus-bold />
                   </v-btn>
                 </template>
@@ -142,8 +173,11 @@ function close() {
 </template>
 
 <style scoped>
-.cantidad {
-  font-size: 2.2rem;
-  padding-left: 2.25rem;
+/* Mobile screen */
+@media (max-width: 600px) {
+  .cantidad {
+    font-size: 1.8rem;
+    padding-top: 0.3rem;
+  }
 }
 </style>

@@ -25,8 +25,12 @@ img {
 }
 
 /* ************************ */
-/*       MY CUSTOM CSS        */
+/*       MY CUSTOM CSS      */
 /* ************************ */
+
+.btn-main {
+  height: 50px;
+}
 
 /* MAIN BG IMG */
 .bg-image {
@@ -77,6 +81,10 @@ img {
 }
 
 /* ############################### */
+/*        CAROUSEL VUETIFY3        */
+/* ############################### */
+
+/* ############################### */
 /*            Responsive           */
 /* ############################### */
 
@@ -84,5 +92,22 @@ img {
 @media (max-width: 600px) {
   .card-bg-image {
     background-size: cover;
+  }
+  .button-cantidad {
+    width: 20px;
+    height: 20px;
+  }
+
+  .selector-cantidad {
+    width: 8.5rem;
+  }
+
+  .cantidad {
+    font-size: 1.4rem;
+    padding-left: 0;
+  }
+
+  .btn-main {
+    height: 45px;
   }
 }

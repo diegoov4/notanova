@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useProductoStore } from '@/store/productoStore'
 // Carousel
 import 'vue3-carousel/dist/carousel.css'
-import { Carousel, Slide } from 'vue3-carousel'
+// import { Carousel, Slide } from 'vue3-carousel'
 
 const authStore = useAuthStore()
 const productosStore = useProductoStore()
@@ -140,13 +140,12 @@ const deleteProduct = async () => {
 </script>
 
 <template>
-  <!-- DMO: Try fill-height -->
-  <v-container class="bg-shelv-image pa-12 rounded-xl">
+  <v-container class="bg-shelv-image pa-12 rounded-xl carousel-cont-resp">
     <!-- Header -->
     <v-row>
       <!-- Carrito -->
       <v-col>
-        <v-btn color="secondary" @click="showFormularioNuevo = true">
+        <v-btn color="secondary" class="btn-main" @click="showFormularioNuevo = true">
           <i-ph-shopping-cart-bold class="mr-2" />
           Producto
         </v-btn>
@@ -167,7 +166,13 @@ const deleteProduct = async () => {
     </v-row>
 
     <!-- Products List (Carousel) -->
-    <Carousel :items-to-show="4.95" hover :wrap-around="true" :transition="500" class="pt-8 pb-10">
+    <!-- <Carousel
+      :items-to-show="4.95"
+      hover
+      :wrap-around="true"
+      :transition="500"
+      class="pt-8 pb-10 d-none d-sm-flex d-md-flex"
+    >
       <template #slides>
         <Slide v-for="product in filteredProducts" :key="product.id">
           <div class="carousel__item">
@@ -188,10 +193,59 @@ const deleteProduct = async () => {
       </template>
 
       <template #addons>
-        <!-- <Navigation /> -->
-        <!-- <Pagination /> -->
+        <Navigation />
+        <Pagination />
       </template>
-    </Carousel>
+    </Carousel> -->
+
+    <!-- Carousel (responsive) -->
+    <v-carousel hide-delimiter-background show-arrows>
+      <template #prev="{ props }">
+        <v-btn icon color="secondary" variant="elevated" @click="props.onClick">&ltcc;</v-btn>
+      </template>
+      <template #next="{ props }">
+        <v-btn icon color="secondary" variant="elevated" @click="props.onClick">&gtcc;</v-btn>
+      </template>
+      <v-carousel-item
+        v-for="product in filteredProducts"
+        :key="product.id"
+        :src="product.images.url"
+      >
+        <!-- Responsive: BS  -->
+        <div class="flex-column fill-height justify-end align-start ml-16 d-none d-sm-flex">
+          <div class="p-resp text-h4 text-white text-uppercase">
+            {{ product.titulo }}
+          </div>
+          <div class="p-cant-resp text-h3 text-amber-accent-2 font-weight-bold">
+            {{ formatCurrency(product.precio) }}
+          </div>
+          <v-btn
+            size="60"
+            class="btn-del-resp mb-13"
+            variant="elevated"
+            color="error"
+            @click="promptDeleteProduct(product)"
+          >
+            <i-ph-trash-duotone />
+          </v-btn>
+        </div>
+
+        <!-- Responsive: only mobile -->
+        <div class="d-flex justify-space-between mt-6 align-center d-sm-none">
+          <p
+            class="text-h6 text-white bg-blue-grey-lighten-1 pl-2 pr-2 text-uppercase font-weight-bold"
+          >
+            {{ product.titulo }}
+          </p>
+          <p class="text-h5 text-white bg-secondary rounded-xl pl-2 pr-2 font-weight-bold">
+            {{ formatCurrency(product.precio) }}
+          </p>
+          <v-btn variant="elevated" color="error" @click="promptDeleteProduct(product)">
+            <i-ph-trash-duotone />
+          </v-btn>
+        </div>
+      </v-carousel-item>
+    </v-carousel>
 
     <!-- Formulario Nuevo Producto -->
     <v-dialog v-model="showFormularioNuevo" persistent max-width="300px">
@@ -256,9 +310,13 @@ const deleteProduct = async () => {
         <v-divider color="primary"></v-divider>
 
         <v-card-actions class="mt-2">
-          <v-btn variant="elevated" color="primary" @click="agregarNuevoProducto">Guardar</v-btn>
+          <v-btn variant="elevated" class="btn-main" color="primary" @click="agregarNuevoProducto">
+            Guardar
+          </v-btn>
           <v-spacer></v-spacer>
-          <v-btn variant="elevated" color="error" @click="closeProductForm">Cerrar</v-btn>
+          <v-btn variant="elevated" class="btn-main" color="error" @click="closeProductForm">
+            Cerrar
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -279,8 +337,15 @@ const deleteProduct = async () => {
         <v-card-text>{{ textToConfirmDialog }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error darken-1" text @click="resetConfirmDialog">Cancelar</v-btn>
-          <v-btn color="primary darken-1" text @click="deleteProduct(productToDelete.value)">
+          <v-btn color="error darken-1" class="btn-main" text @click="resetConfirmDialog">
+            Cancelar
+          </v-btn>
+          <v-btn
+            color="primary darken-1"
+            class="btn-main"
+            text
+            @click="deleteProduct(productToDelete.value)"
+          >
             Confirmar
           </v-btn>
         </v-card-actions>
@@ -288,3 +353,17 @@ const deleteProduct = async () => {
     </v-dialog>
   </v-container>
 </template>
+
+<style scoped>
+.p-resp {
+  margin-left: 13rem;
+  margin-bottom: 1.5rem;
+}
+.p-cant-resp {
+  margin-left: 16rem;
+  margin-bottom: 1rem;
+}
+.btn-del-resp {
+  margin-left: 18rem;
+}
+</style>

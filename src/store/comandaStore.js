@@ -131,7 +131,7 @@ export const useComandaStore = defineStore('comanda', {
     /* ************* */
     /*      POST     */
     /* ************* */
-    async createComanda(cliente, productosSeleccionados, created_by, id_master) {
+    async createComanda(id_cliente, id_mesa, productosSeleccionados, created_by, id_master) {
       if (!id_master) {
         console.error('[STORE]id_master is not provided or is null')
         throw new Error('Master ID is required')
@@ -143,8 +143,8 @@ export const useComandaStore = defineStore('comanda', {
           .insert([
             {
               id_master,
-              id_cliente: cliente.id,
-              id_mesa: 1, // DMO: Cambiar a {Mesa}
+              id_cliente,
+              id_mesa,
               // created_at   //Se añade solo con timestamp
               created_by,
               // closed_at    //NULL por defecto hasta que se cierre

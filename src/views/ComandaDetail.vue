@@ -163,11 +163,15 @@ const eliminarProducto = async producto => {
     <!-- Cabecera Comanda -->
     <v-card class="pa-4 mb-4 rounded-lg">
       <v-card-title class="d-flex justify-space-between align-center">
-        <span class="text-h4 text-capitalize">{{ comanda?.clientes.nombre }}</span>
-        <span class="text-h5 text-right text-grey-darken-3">
-          Total:
+        <span class="text-h4 text-capitalize d-none d-sm-flex">{{ comanda?.clientes.nombre }}</span>
+        <span class="text-h6 text-uppercase mr-2 font-weight-bold text-primary d-sm-none">
+          {{ comanda?.clientes.nombre }}
+        </span>
+
+        <span class="d-flex text-grey-darken-3">
+          <!-- <span class="text-h5 mr-2 d-none d-sm-flex">Total:</span> -->
           <span
-            class="text-h7 font-weight-bold text-secondary"
+            class="text-h4 font-weight-bold text-secondary"
             style="cursor: pointer"
             @click="promptCerrarComanda"
           >
@@ -183,11 +187,12 @@ const eliminarProducto = async producto => {
         <v-list-item v-for="producto_b in comanda?.comandas_productos" :key="producto_b.id">
           <!-- Image Product -->
           <template #prepend>
-            <v-avatar size="110" :image="producto_b.producto.images.url" />
+            <v-avatar class="responsive-avatar" :image="producto_b.producto.images.url" />
           </template>
           <!-- Desc. Product -->
           <template #title>
-            <span class="text-h5">
+            <span class="text-h5 d-none d-sm-flex">{{ producto_b.producto.titulo }}</span>
+            <span class="text-h7 text-uppercase font-weight-bold d-sm-none">
               {{ producto_b.producto.titulo }}
             </span>
           </template>
@@ -196,7 +201,23 @@ const eliminarProducto = async producto => {
             <div class="selector-cantidad pl-6">
               <v-text-field variant="plain">
                 <template #prepend>
-                  <v-btn color="#c7c7c7" icon @click="decrement(producto_b)">
+                  <!-- Uses classes to responsive mode -->
+                  <v-btn
+                    color="#c7c7c7"
+                    class="d-none d-sm-flex"
+                    size="55"
+                    icon
+                    @click="decrement(producto_b)"
+                  >
+                    <i-ph-minus-bold />
+                  </v-btn>
+                  <v-btn
+                    color="#c7c7c7"
+                    class="d-sm-none"
+                    size="35"
+                    icon
+                    @click="decrement(producto_b)"
+                  >
                     <i-ph-minus-bold />
                   </v-btn>
                 </template>
@@ -205,7 +226,22 @@ const eliminarProducto = async producto => {
                 </div>
 
                 <template #append>
-                  <v-btn color="#c7c7c7" icon @click="increment(producto_b)">
+                  <v-btn
+                    color="#c7c7c7"
+                    class="d-none d-sm-flex"
+                    size="55"
+                    icon
+                    @click="increment(producto_b)"
+                  >
+                    <i-ph-plus-bold />
+                  </v-btn>
+                  <v-btn
+                    color="#c7c7c7"
+                    class="d-sm-none"
+                    size="35"
+                    icon
+                    @click="increment(producto_b)"
+                  >
                     <i-ph-plus-bold />
                   </v-btn>
                 </template>
@@ -217,7 +253,7 @@ const eliminarProducto = async producto => {
             <v-btn
               stacked
               size="40"
-              class="ml-16"
+              class="ml-5"
               color="error"
               @click="promptDeleteProducto(producto_b)"
             >
@@ -232,6 +268,7 @@ const eliminarProducto = async producto => {
         <v-btn
           variant="elevated"
           color="secondary"
+          class="btn-main"
           :loading="showProductSelection"
           @click="showProductSelection = true"
         >
@@ -239,7 +276,9 @@ const eliminarProducto = async producto => {
         </v-btn>
         <!-- <v-btn variant="elevated" color="primary" @click="updateComanda">Guardar</v-btn> -->
         <v-spacer></v-spacer>
-        <v-btn variant="elevated" color="grey" @click="goToLandingHome">Salir</v-btn>
+        <v-btn variant="elevated" color="grey" class="btn-main" @click="goToLandingHome">
+          Salir
+        </v-btn>
       </v-card-actions>
 
       <!-- Dialogo Selección Productos -->
@@ -257,11 +296,29 @@ const eliminarProducto = async producto => {
           <v-card-text>{{ textToConfirmDialog }}</v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="error darken-1" text @click="resetConfirmDialog">Cancelar</v-btn>
-            <v-btn color="primary darken-1" text @click="confirmAndReset">Confirmar</v-btn>
+            <v-btn color="error darken-1" class="btn-main" text @click="resetConfirmDialog">
+              Cancelar
+            </v-btn>
+            <v-btn color="primary darken-1" class="btn-main" text @click="confirmAndReset">
+              Confirmar
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-card>
   </v-container>
 </template>
+
+<style scoped>
+.responsive-avatar {
+  width: 110px;
+  height: 110px;
+}
+
+@media (max-width: 600px) {
+  .responsive-avatar {
+    width: 67px;
+    height: 67px;
+  }
+}
+</style>

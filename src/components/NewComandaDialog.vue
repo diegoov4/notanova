@@ -3,6 +3,7 @@ import { ref, onMounted, toRef } from 'vue'
 import { useAuthStore } from '@/store/authStore'
 import { useCommonStore } from '@/store/commonStore'
 import { useClientStore } from '@/store/clienteStore'
+import { useMesaStore } from '@/store/mesaStore'
 import { useComandaStore } from '@/store/comandaStore'
 import { useProductoStore } from '@/store/productoStore'
 
@@ -11,20 +12,24 @@ const emit = defineEmits(['comanda-saved', 'close'])
 const authStore = useAuthStore()
 const commonStore = useCommonStore()
 const clientStore = useClientStore()
+const mesaStore = useMesaStore()
 const comandaStore = useComandaStore()
 const productStore = useProductoStore()
 const userMasterData = toRef(authStore, 'userMasterData')
 const clientes = toRef(clientStore, 'clientes')
+const mesas = toRef(mesaStore, 'mesas')
 const productTypes = toRef(productStore, 'product_types')
 const master_id = userMasterData.value.id
 const created_by = userMasterData.value.responsable
 const selectedCliente = ref(null)
+const selectedMesa = ref(null)
 const showCreateClientDialog = ref(false)
 const showDropdown = ref(false)
 const productosSeleccionados = ref([])
 const showProductSelection = ref(false)
 const optionsList = ref([])
 const clientesList = ref([])
+const mesasList = ref([])
 
 const fetchClients = async () => {
   await clientStore.fetchClients(master_id)
@@ -33,7 +38,16 @@ const fetchClients = async () => {
     id: `${cl.id}`,
     title: `${cl.nombre}`,
   }))
-  console.log('[ClientesList] ', clientesList)
+  console.info('[ClientesList] ', clientesList)
+}
+const fetchMesas = async () => {
+  await mesaStore.fetchMesas(master_id)
+
+  mesasList.value = mesas.value.map(cl => ({
+    id: `${cl.id}`,
+    title: `${cl.nombre}`,
+  }))
+  console.info('[MesasList] ', mesasList)
 }
 const fetchProductos = async () => {
   await productStore.fetchProductos(master_id)
@@ -45,6 +59,7 @@ const fetchProductos = async () => {
 }
 onMounted(() => {
   fetchClients()
+  fetchMesas()
   fetchProductos()
 })
 
@@ -55,6 +70,11 @@ const clientCreated = cliente => {
 
 const selectCliente = cliente => {
   selectedCliente.value = cliente
+  showDropdown.value = false
+}
+
+const selectMesa = mesa => {
+  selectedMesa.value = mesa
   showDropdown.value = false
 }
 
@@ -76,9 +96,22 @@ const saveComanda = async () => {
 
   // Create Comanda
   try {
+    console.info('[selectedCliente] : ', selectedCliente.value)
+
+    // Cuando creamos cliente nuevo viene como objeto. Nos quedamos con el ID
+    if (typeof selectedCliente.value === 'object' && 'id' in selectedCliente.value) {
+      selectedCliente.value = selectedCliente.value.id
+    }
+
+    // Si no se elige la mesa se pone siempre por defecto: 9: Sin mesa
+    if (selectedMesa.value === null) {
+      selectedMesa.value = 9
+    }
+
     if (master_id) {
       await comandaStore.createComanda(
         selectedCliente.value,
+        selectedMesa.value,
         productosSeleccionados.value,
         created_by,
         master_id
@@ -99,6 +132,7 @@ const saveComanda = async () => {
 const resetDialog = () => {
   productosSeleccionados.value = []
   selectedCliente.value = null
+  selectedMesa.value = null
   showProductSelection.value = false
   commonStore.setShowNewComandaDialog(false)
   emit('close')
@@ -114,16 +148,14 @@ const resetDialog = () => {
         <i-ph-x-bold @click="resetDialog" />
       </v-card-title>
 
-      <!-- <v-divider :thickness="1" color="primary"></v-divider> -->
-
-      <!-- Selector-->
+      <!-- Selector -->
       <v-card-item>
         <!-- Row: Cliente y Mesa same line -->
         <template #default>
           <v-row no-gutters class="justify-center text-center">
             <!-- Clientes -->
             <v-col>
-              <v-sheet class="ma-2 pa-2">
+              <v-sheet class="ma-2 pa-2 select-resp">
                 <v-select
                   v-model="selectedCliente"
                   :items="clientesList"
@@ -140,13 +172,13 @@ const resetDialog = () => {
             <v-col>
               <v-sheet class="ma-2 pa-2">
                 <v-select
-                  v-model="selectedCliente"
-                  :items="clientesList"
+                  v-model="selectedMesa"
+                  :items="mesasList"
                   item-text="title"
                   item-value="id"
                   label="Mesa"
                   placeholder="Seleccione Mesa"
-                  @change="selectCliente"
+                  @change="selectMesa"
                 ></v-select>
               </v-sheet>
             </v-col>
@@ -168,7 +200,7 @@ const resetDialog = () => {
 
       <v-divider :thickness="2" color="primary"></v-divider>
 
-      <!-- Lista de productos seleccionados -->
+      <!-- Resumen productos seleccionados -->
       <v-list lines="two" class="overflow-y-auto mh-31">
         <v-list-item
           v-for="producto in productosSeleccionados"
@@ -177,24 +209,24 @@ const resetDialog = () => {
           :title="producto.titulo"
           :subtitle="producto.cantidad"
           :prepend-avatar="producto.images.url"
-        >
-          <!-- Image Product -->
-          <!-- <template #prepend>
+        />
+        <!-- Image Product -->
+        <!-- <template #prepend>
             <v-avatar size="80" :image="producto.images.url" />
           </template> -->
-          <!-- Desc. Product -->
-          <!-- <template #title>
+        <!-- Desc. Product -->
+        <!-- <template #title>
             {{ producto.titulo }}
           </template> -->
-          <!-- Cantidad -->
-          <!-- <template #subtitle>
+        <!-- Cantidad -->
+        <!-- <template #subtitle>
             <div class="selector-cantidad pl-6">
             <v-text-field variant="plain">
               {{ producto.cantidad }}
             </v-text-field>
             </div>
           </template> -->
-        </v-list-item>
+        <!-- </v-list-item> -->
       </v-list>
 
       <!-- Footer. Editar comanda y Productos -->
@@ -202,6 +234,7 @@ const resetDialog = () => {
         <v-btn
           variant="elevated"
           color="secondary"
+          class="btn-main"
           :loading="showProductSelection"
           @click="showProductSelection = true"
         >
@@ -212,12 +245,12 @@ const resetDialog = () => {
         <v-btn
           variant="elevated"
           color="primary"
-          class="pa-2"
+          class="btn-main"
           :loading="showProductSelection"
           @click="saveComanda"
         >
           <i-mdi-content-save-edit-outline class="mr-2" />
-          Crear Comanda
+          Crear
         </v-btn>
       </v-card-actions>
 

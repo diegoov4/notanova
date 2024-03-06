@@ -71,7 +71,7 @@ const close = () => {
 
       <!-- Footer -->
       <v-card-actions>
-        <v-btn variant="elevated" color="error" @click="close">Cerrar</v-btn>
+        <v-btn variant="elevated" color="error" class="btn-main" @click="close">Cerrar</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

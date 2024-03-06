@@ -47,7 +47,10 @@ const deleteCliente = async () => {
     <v-card class="pa-4 mb-4 rounded-lg">
       <!-- Header -->
       <v-card-title class="d-flex justify-space-between align-center mb-5">
-        <span class="text-h4 text-primary font-weight-bold text-uppercase">Clientes</span>
+        <span class="text-h4 text-primary font-weight-bold text-uppercase d-none d-sm-flex">
+          Clientes
+        </span>
+        <span class="text-h5 text-primary font-weight-bold text-uppercase d-sm-none">Clientes</span>
       </v-card-title>
 
       <v-divider color="primary" :thickness="3"></v-divider>
@@ -58,7 +61,7 @@ const deleteCliente = async () => {
           <!-- Client avatar (standard) -->
           <template #prepend>
             <!-- <v-avatar size="70" image="@/assets/header_logo.png" alt="cliente" /> -->
-            <v-btn icon size="70" class="mr-6" color="grey">
+            <v-btn icon class="mr-6" color="grey">
               <i-mdi-card-account-details />
             </v-btn>
           </template>
@@ -99,8 +102,12 @@ const deleteCliente = async () => {
           <v-card-text>¿Seguro que deseas eliminar el cliente seleccionado?</v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="error darken-1" text @click="showConfirmDialog = false">Cancelar</v-btn>
-            <v-btn color="primary darken-1" text @click="deleteCliente">Confirmar</v-btn>
+            <v-btn color="error darken-1" class="btn-main" text @click="showConfirmDialog = false">
+              Cancelar
+            </v-btn>
+            <v-btn color="primary darken-1" class="btn-main" text @click="deleteCliente">
+              Confirmar
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>

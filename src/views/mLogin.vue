@@ -86,10 +86,11 @@ const handleLogin = async () => {
           size="large"
           variant="elevated"
           color="primary"
+          class="text-uppercase"
           :loading="loadingLogin"
           @click="handleLogin"
         >
-          LOG IN
+          LoG In
         </v-btn>
       </v-card-actions>
     </v-card>

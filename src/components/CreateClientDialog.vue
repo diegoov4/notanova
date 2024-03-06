@@ -59,7 +59,7 @@ const close = () => {
       </v-card-text>
 
       <v-card-actions>
-        <v-btn variant="elevated" color="primary" class="pa-2" @click="addNewClient">
+        <v-btn variant="elevated" color="primary" class="pa-2 btn-main" @click="addNewClient">
           <i-ph-user-plus-duotone class="mr-2" />
           Crear
         </v-btn>
