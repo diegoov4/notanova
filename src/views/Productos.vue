@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useProductoStore } from '@/store/productoStore'
 // Carousel
 import 'vue3-carousel/dist/carousel.css'
-// import { Carousel, Slide } from 'vue3-carousel'
+import { Carousel, Slide } from 'vue3-carousel'
 
 const authStore = useAuthStore()
 const productosStore = useProductoStore()
@@ -26,6 +26,25 @@ const nuevoProducto = ref({
   id_imagen: 27, // Imagen de Producto por defecto. DMO: Cambiar a hacer la busqueda por Default=TRUE
   url: '',
   precio: '',
+})
+// Carousel Settings
+const settings = ref({
+  itemsToShow: 1,
+  snapAlign: 'center',
+})
+// breakpoints are mobile first
+// any settings not specified will fallback to the carousel settings
+const breakpoints = ref({
+  // 700px and up
+  700: {
+    itemsToShow: 2,
+    snapAlign: 'center',
+  },
+  // 1024 and up
+  1024: {
+    itemsToShow: 4.5,
+    snapAlign: 'center',
+  },
 })
 
 const filteredProducts = computed(() => {
@@ -140,7 +159,7 @@ const deleteProduct = async () => {
 </script>
 
 <template>
-  <v-container class="bg-shelv-image pa-12 rounded-xl carousel-cont-resp">
+  <v-container class="bg-shelv-image pa-12 rounded-xl">
     <!-- Header -->
     <v-row>
       <!-- Carrito -->
@@ -157,8 +176,8 @@ const deleteProduct = async () => {
           :items="optionsList"
           item-text="title"
           item-value="id"
-          bg-color="white"
-          base-color="black"
+          bg-color="brown-darken-1"
+          base-color="white"
           label="Tipo de producto"
           placeholder="Seleccione tipo"
         />
@@ -166,12 +185,12 @@ const deleteProduct = async () => {
     </v-row>
 
     <!-- Products List (Carousel) -->
-    <!-- <Carousel
-      :items-to-show="4.95"
+    <Carousel
+      v-bind="settings"
+      :breakpoints="breakpoints"
       hover
       :wrap-around="true"
       :transition="500"
-      class="pt-8 pb-10 d-none d-sm-flex d-md-flex"
     >
       <template #slides>
         <Slide v-for="product in filteredProducts" :key="product.id">
@@ -183,8 +202,13 @@ const deleteProduct = async () => {
               :image="product.images.url"
               :alt="product.titulo"
             />
-            <p class="text-h5 text-white">{{ product.titulo }}</p>
-            <p class="text-h6 text-amber-accent-2">{{ formatCurrency(product.precio) }}</p>
+            <p class="text-h5 text-white bg-brown-darken-1 rounded-shaped">
+              {{ product.titulo }}
+            </p>
+            <p class="text-h6 text-grey-lighten-3 bg-secondary rounded-shaped">
+              <!-- text-amber-accent-2 -->
+              {{ formatCurrency(product.precio) }}
+            </p>
             <v-btn variant="elevated" color="error" @click="promptDeleteProduct(product)">
               <i-ph-trash-duotone />
             </v-btn>
@@ -192,178 +216,156 @@ const deleteProduct = async () => {
         </Slide>
       </template>
 
-      <template #addons>
+      <!-- <template #addons>
         <Navigation />
         <Pagination />
-      </template>
-    </Carousel> -->
-
-    <!-- Carousel (responsive) -->
-    <v-carousel hide-delimiter-background show-arrows>
-      <template #prev="{ props }">
-        <v-btn icon color="secondary" variant="elevated" @click="props.onClick">&ltcc;</v-btn>
-      </template>
-      <template #next="{ props }">
-        <v-btn icon color="secondary" variant="elevated" @click="props.onClick">&gtcc;</v-btn>
-      </template>
-      <v-carousel-item
-        v-for="product in filteredProducts"
-        :key="product.id"
-        :src="product.images.url"
-      >
-        <!-- Responsive: BS  -->
-        <div class="flex-column fill-height justify-end align-start ml-16 d-none d-sm-flex">
-          <div class="p-resp text-h4 text-white text-uppercase">
-            {{ product.titulo }}
-          </div>
-          <div class="p-cant-resp text-h3 text-amber-accent-2 font-weight-bold">
-            {{ formatCurrency(product.precio) }}
-          </div>
-          <v-btn
-            size="60"
-            class="btn-del-resp mb-13"
-            variant="elevated"
-            color="error"
-            @click="promptDeleteProduct(product)"
-          >
-            <i-ph-trash-duotone />
-          </v-btn>
-        </div>
-
-        <!-- Responsive: only mobile -->
-        <div class="d-flex justify-space-between mt-6 align-center d-sm-none">
-          <p
-            class="text-h6 text-white bg-blue-grey-lighten-1 pl-2 pr-2 text-uppercase font-weight-bold"
-          >
-            {{ product.titulo }}
-          </p>
-          <p class="text-h5 text-white bg-secondary rounded-xl pl-2 pr-2 font-weight-bold">
-            {{ formatCurrency(product.precio) }}
-          </p>
-          <v-btn variant="elevated" color="error" @click="promptDeleteProduct(product)">
-            <i-ph-trash-duotone />
-          </v-btn>
-        </div>
-      </v-carousel-item>
-    </v-carousel>
-
-    <!-- Formulario Nuevo Producto -->
-    <v-dialog v-model="showFormularioNuevo" persistent max-width="300px">
-      <v-card class="pa-4 mb-4 rounded-lg">
-        <!-- Header -->
-        <v-card-title class="d-flex justify-space-between align-center">
-          Nuevo Producto
-          <i-ph-x-bold @click="closeProductForm" />
-        </v-card-title>
-
-        <v-divider color="primary"></v-divider>
-
-        <!-- Fields for new Product -->
-        <v-card-text>
-          <v-text-field
-            v-model="nuevoProducto.titulo"
-            clearable
-            label="Titulo"
-            variant="outlined"
-          />
-          <v-text-field
-            v-model.number="nuevoProducto.precio"
-            min="0"
-            type="number"
-            label="Precio (€)"
-            variant="outlined"
-          />
-          <!-- Fake input para imagen -->
-          <v-text-field
-            hover
-            variant="outlined"
-            class="text-grey-darken-1"
-            @click="showImageSelector = true"
-          >
-            <template #prepend-inner>
-              <v-avatar
-                v-if="selectedImage"
-                size="40"
-                class="mr-2"
-                :image="selectedImage?.url"
-                alt="imagen"
-              />
-            </template>
-            <span class="overflow-hidden-ellipsis">
-              {{ selectedImage?.titulo || 'Imagen' }}
-            </span>
-            <template #append-inner>
-              <v-fade-transition leave-absolute>
-                <v-progress-circular
-                  v-if="showImageSelector"
-                  color="info"
-                  indeterminate
-                  size="24"
-                ></v-progress-circular>
-
-                <i-ph-plus-bold v-else />
-              </v-fade-transition>
-            </template>
-          </v-text-field>
-        </v-card-text>
-
-        <v-divider color="primary"></v-divider>
-
-        <v-card-actions class="mt-2">
-          <v-btn variant="elevated" class="btn-main" color="primary" @click="agregarNuevoProducto">
-            Guardar
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn variant="elevated" class="btn-main" color="error" @click="closeProductForm">
-            Cerrar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Selector de Imagen -->
-    <ImageSelectorDialog
-      v-model="showImageSelector"
-      :options-list="optionsList"
-      @select="handleImageSelect"
-      @close="showImageSelector = false"
-    />
-
-    <!-- ############## -->
-    <!-- Confirm Dialog -->
-    <v-dialog v-model="showConfirmDialog" persistent max-width="300px">
-      <v-card>
-        <v-card-title class="text-h5">{{ titleToConfirmDialog }}</v-card-title>
-        <v-card-text>{{ textToConfirmDialog }}</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="error darken-1" class="btn-main" text @click="resetConfirmDialog">
-            Cancelar
-          </v-btn>
-          <v-btn
-            color="primary darken-1"
-            class="btn-main"
-            text
-            @click="deleteProduct(productToDelete.value)"
-          >
-            Confirmar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+      </template> -->
+    </Carousel>
   </v-container>
+
+  <!-- ##################################### -->
+  <!-- out from containter. Dialogs,Forms... -->
+  <!-- ##################################### -->
+
+  <!-- Formulario Nuevo Producto -->
+  <v-dialog v-model="showFormularioNuevo" persistent max-width="300px">
+    <v-card class="pa-4 mb-4 rounded-lg">
+      <!-- Header -->
+      <v-card-title class="d-flex justify-space-between align-center">
+        Nuevo Producto
+        <i-ph-x-bold @click="closeProductForm" />
+      </v-card-title>
+
+      <v-divider color="primary"></v-divider>
+
+      <!-- Fields for new Product -->
+      <v-card-text>
+        <v-text-field v-model="nuevoProducto.titulo" clearable label="Titulo" variant="outlined" />
+        <v-text-field
+          v-model.number="nuevoProducto.precio"
+          min="0"
+          type="number"
+          label="Precio (€)"
+          variant="outlined"
+        />
+        <!-- Fake input para imagen -->
+        <v-text-field
+          hover
+          variant="outlined"
+          class="text-grey-darken-1"
+          @click="showImageSelector = true"
+        >
+          <template #prepend-inner>
+            <v-avatar
+              v-if="selectedImage"
+              size="40"
+              class="mr-2"
+              :image="selectedImage?.url"
+              alt="imagen"
+            />
+          </template>
+          <span class="overflow-hidden-ellipsis">
+            {{ selectedImage?.titulo || 'Imagen' }}
+          </span>
+          <template #append-inner>
+            <v-fade-transition leave-absolute>
+              <v-progress-circular
+                v-if="showImageSelector"
+                color="info"
+                indeterminate
+                size="24"
+              ></v-progress-circular>
+
+              <i-ph-plus-bold v-else />
+            </v-fade-transition>
+          </template>
+        </v-text-field>
+      </v-card-text>
+
+      <v-divider color="primary"></v-divider>
+
+      <v-card-actions class="mt-2">
+        <v-btn variant="elevated" class="btn-main" color="primary" @click="agregarNuevoProducto">
+          Guardar
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn variant="elevated" class="btn-main" color="error" @click="closeProductForm">
+          Cerrar
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <!-- Selector de Imagen -->
+  <ImageSelectorDialog
+    v-model="showImageSelector"
+    :options-list="optionsList"
+    @select="handleImageSelect"
+    @close="showImageSelector = false"
+  />
+
+  <!-- ############## -->
+  <!-- Confirm Dialog -->
+  <v-dialog v-model="showConfirmDialog" persistent max-width="300px">
+    <v-card>
+      <v-card-title class="text-h5">{{ titleToConfirmDialog }}</v-card-title>
+      <v-card-text>{{ textToConfirmDialog }}</v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="error darken-1" class="btn-main" text @click="resetConfirmDialog">
+          Cancelar
+        </v-btn>
+        <v-btn
+          color="primary darken-1"
+          class="btn-main"
+          text
+          @click="deleteProduct(productToDelete.value)"
+        >
+          Confirmar
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
-.p-resp {
-  margin-left: 13rem;
-  margin-bottom: 1.5rem;
+.carousel__slide {
+  padding: 50px;
 }
-.p-cant-resp {
-  margin-left: 16rem;
-  margin-bottom: 1rem;
+
+.carousel__viewport {
+  perspective: 2000px;
 }
-.btn-del-resp {
-  margin-left: 18rem;
+
+.carousel__track {
+  transform-style: preserve-3d;
+}
+
+.carousel__slide--sliding {
+  transition: 0.5s;
+}
+
+.carousel__slide {
+  opacity: 0.9;
+  transform: rotateY(-20deg) scale(0.9);
+}
+
+.carousel__slide--active ~ .carousel__slide {
+  transform: rotateY(20deg) scale(0.9);
+}
+
+.carousel__slide--prev {
+  opacity: 1;
+  transform: rotateY(-10deg) scale(0.85);
+}
+
+.carousel__slide--next {
+  opacity: 1;
+  transform: rotateY(10deg) scale(0.85);
+}
+
+.carousel__slide--active {
+  opacity: 1;
+  transform: rotateY(0) scale(1.15);
 }
 </style>
