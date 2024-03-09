@@ -42,6 +42,7 @@ const deleteCliente = async () => {
   } else alert('No se ha podido borrar el cliente porque tiene comandas asignadas') // Handle error
 }
 </script>
+
 <template>
   <v-container>
     <v-card class="pa-4 mb-4 rounded-lg">

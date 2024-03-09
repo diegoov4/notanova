@@ -23,6 +23,7 @@ const master_id = userMasterData.value.id
 const created_by = userMasterData.value.responsable
 const selectedCliente = ref(null)
 const selectedMesa = ref(null)
+const defaultMesa = ref(null)
 const showCreateClientDialog = ref(false)
 const showDropdown = ref(false)
 const productosSeleccionados = ref([])
@@ -41,12 +42,21 @@ const fetchClients = async () => {
   console.info('[ClientesList] ', clientesList)
 }
 const fetchMesas = async () => {
+  // Obtenemos las mesas
   await mesaStore.fetchMesas(master_id)
 
+  // obtenemos la lista de mesas con formato para el select
   mesasList.value = mesas.value.map(cl => ({
     id: `${cl.id}`,
     title: `${cl.nombre}`,
   }))
+  // Obtenemos la mesa por defecto para el select
+  defaultMesa.value = mesas.value.find(mesa => mesa.default === true)
+  selectedMesa.value = {
+    id: `${defaultMesa.value.id}`,
+    title: `${defaultMesa.value.nombre}`,
+  }
+
   console.info('[MesasList] ', mesasList)
 }
 const fetchProductos = async () => {
@@ -103,9 +113,9 @@ const saveComanda = async () => {
       selectedCliente.value = selectedCliente.value.id
     }
 
-    // Si no se elige la mesa se pone siempre por defecto: 9: Sin mesa
+    // Si no se elige la mesa se pone siempre la de por defecto
     if (selectedMesa.value === null) {
-      selectedMesa.value = 9
+      selectedMesa.value = 11
     }
 
     if (master_id) {
@@ -132,7 +142,10 @@ const saveComanda = async () => {
 const resetDialog = () => {
   productosSeleccionados.value = []
   selectedCliente.value = null
-  selectedMesa.value = null
+  selectedMesa.value = {
+    id: `${defaultMesa.value.id}`,
+    title: `${defaultMesa.value.nombre}`,
+  }
   showProductSelection.value = false
   commonStore.setShowNewComandaDialog(false)
   emit('close')

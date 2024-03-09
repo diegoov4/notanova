@@ -280,33 +280,36 @@ const eliminarProducto = async producto => {
           Salir
         </v-btn>
       </v-card-actions>
-
-      <!-- Dialogo Selección Productos -->
-      <ProductSelectionDialog
-        v-model="showProductSelection"
-        :options-list="optionsList"
-        @selected-products="showProducts"
-        @close="showProductSelection = false"
-      />
-      <!-- ############## -->
-      <!-- Confirm Dialog -->
-      <v-dialog v-model="showConfirmDialog" persistent max-width="300px">
-        <v-card>
-          <v-card-title class="text-h5">{{ titleToConfirmDialog }}</v-card-title>
-          <v-card-text>{{ textToConfirmDialog }}</v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="error darken-1" class="btn-main" text @click="resetConfirmDialog">
-              Cancelar
-            </v-btn>
-            <v-btn color="primary darken-1" class="btn-main" text @click="confirmAndReset">
-              Confirmar
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
     </v-card>
   </v-container>
+
+  <!-- ##################################### -->
+  <!-- out from containter. Dialogs,Forms... -->
+  <!-- ##################################### -->
+
+  <!-- Dialogo Selección Productos -->
+  <ProductSelectionDialog
+    v-model="showProductSelection"
+    :options-list="optionsList"
+    @selected-products="showProducts"
+    @close="showProductSelection = false"
+  />
+  <!-- Confirm Dialog -->
+  <v-dialog v-model="showConfirmDialog" persistent max-width="300px">
+    <v-card>
+      <v-card-title class="text-h5">{{ titleToConfirmDialog }}</v-card-title>
+      <v-card-text>{{ textToConfirmDialog }}</v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="error darken-1" class="btn-main" text @click="resetConfirmDialog">
+          Cancelar
+        </v-btn>
+        <v-btn color="primary darken-1" class="btn-main" text @click="confirmAndReset">
+          Confirmar
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
