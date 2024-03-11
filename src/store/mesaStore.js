@@ -30,19 +30,30 @@ export const useMesaStore = defineStore('mesa', {
     /* ************* */
     /*      POST     */
     /* ************* */
-    async createMesa(nombreMesa, id_master) {
+    async createMesa(mesa, id_master) {
       if (!id_master) {
         console.error('id_master is not provided or is null')
         throw new Error('Master ID is required')
       }
 
-      const { error } = await supabase.from('mesas').insert([{ nombre: nombreMesa, id_master }])
+      const { data, error } = await supabase
+        .from('mesas')
+        .insert([
+          {
+            nombre: mesa.nombre,
+            id_master,
+            default: mesa.default,
+            forma: mesa.forma,
+          },
+        ])
+        .select()
 
       if (error) {
         console.error('Error al crear la mesa[STORE]:', error)
         throw error
       } else {
-        console.info('MESA[STORE]: ', nombreMesa, ' CREADA')
+        console.info('MESA[STORE]: ', mesa.nombre, ' CREADA')
+        return data[0]
       }
     },
 

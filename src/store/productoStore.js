@@ -103,6 +103,7 @@ export const useProductoStore = defineStore('producto', {
         )
         throw new Error('Master ID, Titulo or Precio are required')
       }
+
       const { data, error } = await supabase
         .from('productos')
         .insert([
