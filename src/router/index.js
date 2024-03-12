@@ -6,6 +6,7 @@ import ComandaDetail from '@/views/ComandaDetail.vue'
 import Clientes from '@/views/Clientes.vue'
 import Mesas from '@/views/Mesas.vue'
 import Productos from '@/views/Productos.vue'
+import Informes from '@/views/Informes.vue'
 
 const routes = [
   {
@@ -42,6 +43,12 @@ const routes = [
     path: '/productos',
     name: 'Productos',
     component: Productos,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/informes',
+    name: 'Informes',
+    component: Informes,
     meta: { requiresAuth: true },
   },
 ]

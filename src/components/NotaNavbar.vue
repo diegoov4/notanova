@@ -56,11 +56,6 @@ const auth_user = authStore.auth_user
               <i-ph-plus-square-bold class="mr-2 text-white text-h6" />
             </template>
           </v-list-item>
-          <v-list-item link to="/productos" title="Productos">
-            <template #prepend>
-              <i-ph-sign-out-duotone class="mr-2 text-h6" />
-            </template>
-          </v-list-item>
           <v-list-item link to="/clientes" title="Clientes">
             <template #prepend>
               <i-mdi-account-supervisor class="mr-2 text-h6" />
@@ -69,6 +64,16 @@ const auth_user = authStore.auth_user
           <v-list-item link to="/mesas" title="Mesas">
             <template #prepend>
               <i-mdi-table-picnic class="mr-2 text-h6" />
+            </template>
+          </v-list-item>
+          <v-list-item link to="/informes" title="Informes">
+            <template #prepend>
+              <i-ph-file-cloud-bold class="mr-2 text-h6" />
+            </template>
+          </v-list-item>
+          <v-list-item link to="/productos" title="Productos">
+            <template #prepend>
+              <i-ph-list-magnifying-glass-bold class="mr-2 text-h6" />
             </template>
           </v-list-item>
         </v-list>
@@ -94,9 +99,22 @@ const auth_user = authStore.auth_user
     <v-spacer></v-spacer>
 
     <!-- Button in big screens  -->
-    <v-btn text class="d-none d-md-flex" to="/productos">Productos</v-btn>
-    <v-btn text class="d-none d-md-flex" to="/clientes">Clientes</v-btn>
-    <v-btn text class="d-none d-md-flex" to="/mesas">Mesas</v-btn>
+    <v-btn text class="d-none d-md-flex" to="/clientes">
+      <!-- <i-mdi-account-supervisor class="mr-2 text-h6" /> -->
+      Clientes
+    </v-btn>
+    <v-btn text class="d-none d-md-flex" to="/mesas">
+      <!-- <i-mdi-table-picnic class="mr-2 text-h6" /> -->
+      Mesas
+    </v-btn>
+    <v-btn text class="d-none d-md-flex" to="/informes">
+      <!-- <i-ph-file-cloud-bold class="mr-2 text-h6" /> -->
+      Informes
+    </v-btn>
+    <v-btn text class="d-none d-md-flex" to="/productos">
+      <!-- <i-ph-list-magnifying-glass-bold class="mr-2 text-h6" /> -->
+      Productos
+    </v-btn>
 
     <!-- User and logout -->
     <v-menu>
@@ -110,7 +128,7 @@ const auth_user = authStore.auth_user
       <v-list>
         <v-list-item link :title="'Cerrar Sesión'" @click="logout">
           <template #append>
-            <i-ph-sign-out-duotone class="text-error text-h6" />
+            <i-ph-sign-out-duotone class="ml-1 text-error text-h6" />
           </template>
         </v-list-item>
       </v-list>
