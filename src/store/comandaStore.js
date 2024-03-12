@@ -30,7 +30,7 @@ export const useComandaStore = defineStore('comanda', {
                         nombre
                     ),
                     mesas (
-                        nombre
+                        nombre,
                         forma
                     ),
                     comandas_productos (
@@ -86,7 +86,7 @@ export const useComandaStore = defineStore('comanda', {
                             nombre
                         ),
                         mesas (
-                            nombre
+                            nombre,
                             forma
                         ),
                         comandas_productos (
