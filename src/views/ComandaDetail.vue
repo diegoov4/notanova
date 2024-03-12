@@ -163,11 +163,25 @@ const eliminarProducto = async producto => {
     <!-- Cabecera Comanda -->
     <v-card class="pa-4 mb-4 rounded-lg">
       <v-card-title class="d-flex justify-space-between align-center">
+        <!-- Cliente -->
         <span class="text-h4 text-capitalize d-none d-sm-flex">{{ comanda?.clientes.nombre }}</span>
         <span class="text-h6 text-uppercase mr-2 font-weight-bold text-primary d-sm-none">
           {{ comanda?.clientes.nombre }}
         </span>
 
+        <!-- Mesa -->
+        <span class="text-h5 text-capitalize d-none d-sm-flex">
+          <i-mdi-table-chair class="mr-2" />
+          {{ comanda?.mesas.nombre }}
+        </span>
+        <span
+          class="text-h8 text-uppercase mr-2 font-weight-bold text-blue-grey-darken-3 d-sm-none"
+        >
+          -
+          {{ comanda?.mesas.nombre }}
+        </span>
+
+        <!-- Total -->
         <span class="d-flex text-grey-darken-3">
           <!-- <span class="text-h5 mr-2 d-none d-sm-flex">Total:</span> -->
           <span
