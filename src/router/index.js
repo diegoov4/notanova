@@ -6,7 +6,8 @@ import ComandaDetail from '@/views/ComandaDetail.vue'
 import Clientes from '@/views/Clientes.vue'
 import Mesas from '@/views/Mesas.vue'
 import Productos from '@/views/Productos.vue'
-import Informes from '@/views/Informes.vue'
+import InformesEco from '@/views/InformesEco.vue'
+import InformesInv from '@/views/InformesInv.vue'
 
 const routes = [
   {
@@ -46,9 +47,15 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/informes',
-    name: 'Informes',
-    component: Informes,
+    path: '/informes/economico',
+    name: 'InformesEco',
+    component: InformesEco,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/informes/inventario',
+    name: 'InformesInv',
+    component: InformesInv,
     meta: { requiresAuth: true },
   },
 ]

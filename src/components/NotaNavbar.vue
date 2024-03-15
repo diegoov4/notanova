@@ -34,7 +34,7 @@ const auth_user = authStore.auth_user
   <v-app-bar app>
     <template #prepend>
       <!-- ############################ -->
-      <!-- Botón del menú "hamburger" para pantallas pequeñas -->
+      <!-- Botón del menú "hamburgesa" para mobile/tablet -->
       <!-- ############################ -->
       <v-menu class="d-md-none">
         <template #activator="{ props }">
@@ -56,26 +56,50 @@ const auth_user = authStore.auth_user
               <i-ph-plus-square-bold class="mr-2 text-white text-h6" />
             </template>
           </v-list-item>
+          <!-- CLIENTES -->
           <v-list-item link to="/clientes" title="Clientes">
             <template #prepend>
               <i-mdi-account-supervisor class="mr-2 text-h6" />
             </template>
           </v-list-item>
+          <!-- MESAS -->
           <v-list-item link to="/mesas" title="Mesas">
             <template #prepend>
               <i-mdi-table-picnic class="mr-2 text-h6" />
             </template>
           </v-list-item>
-          <v-list-item link to="/informes" title="Informes">
-            <template #prepend>
-              <i-ph-file-cloud-bold class="mr-2 text-h6" />
-            </template>
-          </v-list-item>
+          <!-- PRODUCTOS -->
           <v-list-item link to="/productos" title="Productos">
             <template #prepend>
               <i-ph-list-magnifying-glass-bold class="mr-2 text-h6" />
             </template>
           </v-list-item>
+          <!-- INFORMES -->
+          <v-menu>
+            <template #activator="{ props }">
+              <v-list-item link v-bind="props" title="Informes">
+                <template #prepend>
+                  <i-ph-file-cloud-bold class="mr-2 text-h6" />
+                </template>
+                <template #append>
+                  <i-mdi-chevron-down class="mr-l text-h6" />
+                </template>
+              </v-list-item>
+            </template>
+
+            <v-list>
+              <v-list-item link to="/informes/economico" title="Economico">
+                <template #prepend>
+                  <i-ph-chart-line-up-bold class="mr-2 text-h6" />
+                </template>
+              </v-list-item>
+              <v-list-item link to="/informes/inventario" title="Inventario">
+                <template #prepend>
+                  <i-ph-chart-scatter-bold class="mr-2 text-h6" />
+                </template>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </v-list>
       </v-menu>
 
@@ -98,25 +122,48 @@ const auth_user = authStore.auth_user
     <!-- spacer to align right -->
     <v-spacer></v-spacer>
 
-    <!-- Button in big screens  -->
+    <!-- CLIENTES  -->
     <v-btn text class="d-none d-md-flex" to="/clientes">
       <!-- <i-mdi-account-supervisor class="mr-2 text-h6" /> -->
       Clientes
     </v-btn>
+
+    <!-- MESAS -->
     <v-btn text class="d-none d-md-flex" to="/mesas">
       <!-- <i-mdi-table-picnic class="mr-2 text-h6" /> -->
       Mesas
     </v-btn>
-    <v-btn text class="d-none d-md-flex" to="/informes">
-      <!-- <i-ph-file-cloud-bold class="mr-2 text-h6" /> -->
-      Informes
-    </v-btn>
+
+    <!-- PRODUCTOS -->
     <v-btn text class="d-none d-md-flex" to="/productos">
       <!-- <i-ph-list-magnifying-glass-bold class="mr-2 text-h6" /> -->
       Productos
     </v-btn>
 
-    <!-- User and logout -->
+    <!-- INFORMES -->
+    <v-menu class="d-none d-md-flex">
+      <template #activator="{ props }">
+        <v-btn text v-bind="props" class="d-none d-md-flex">
+          Informes
+          <i-mdi-chevron-down />
+        </v-btn>
+      </template>
+
+      <v-list>
+        <v-list-item link to="/informes/economico" title="Economico">
+          <template #prepend>
+            <i-ph-chart-line-up-bold class="mr-2 text-h6" />
+          </template>
+        </v-list-item>
+        <v-list-item link to="/informes/inventario" title="Inventario">
+          <template #prepend>
+            <i-ph-chart-scatter-bold class="mr-2 text-h6" />
+          </template>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+
+    <!-- USER INFO + LOGOUT -->
     <v-menu>
       <template #activator="{ props }">
         <v-btn text v-bind="props">

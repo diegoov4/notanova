@@ -13,7 +13,7 @@ export const useComandaStore = defineStore('comanda', {
     /* ************* */
     /*      GET      */
     /* ************* */
-    async fetchComandas(id_master) {
+    async fetchComandas(id_master, status) {
       this.comandas = null
 
       if (!id_master) {
@@ -21,32 +21,38 @@ export const useComandaStore = defineStore('comanda', {
         throw new Error('Master ID is required')
       }
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('comandas')
         .select(
           `
-                    *,
-                    clientes (
-                        nombre
-                    ),
-                    mesas (
-                        nombre,
-                        forma
-                    ),
-                    comandas_productos (
-                        cantidad,
-                        productos (
-                            *,
-                            images (
-                                url
-                            )
+                *,
+                clientes (
+                    nombre
+                ),
+                mesas (
+                    nombre,
+                    forma
+                ),
+                comandas_productos (
+                    cantidad,
+                    productos (
+                        *,
+                        images (
+                            url
                         )
                     )
-                    `
+                )
+          `
         )
         .eq('id_master', id_master)
-        .eq('status', 'open')
         .order('created_at', { ascending: false })
+
+      // Apply status filter only if status is provided
+      if (status) {
+        query = query.eq('status', status)
+      }
+
+      const { data, error } = await query
 
       if (error) {
         console.error('[STORE]Error al obtener comandas:', error)

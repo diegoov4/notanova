@@ -175,7 +175,7 @@ const eliminarProducto = async producto => {
           {{ comanda?.mesas.nombre }}
         </span>
         <span
-          class="text-h8 text-uppercase mr-2 font-weight-bold text-blue-grey-darken-3 d-sm-none"
+          class="text-subtitle-2 text-uppercase mr-2 font-weight-bold text-blue-grey-darken-3 d-sm-none"
         >
           -
           {{ comanda?.mesas.nombre }}
@@ -206,7 +206,7 @@ const eliminarProducto = async producto => {
           <!-- Desc. Product -->
           <template #title>
             <span class="text-h5 d-none d-sm-flex">{{ producto_b.producto.titulo }}</span>
-            <span class="text-h7 text-uppercase font-weight-bold d-sm-none">
+            <span class="text-subtitle-2 text-uppercase font-weight-bold d-sm-none">
               {{ producto_b.producto.titulo }}
             </span>
           </template>

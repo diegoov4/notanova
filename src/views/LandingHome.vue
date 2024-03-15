@@ -18,7 +18,8 @@ const closeDialog = () => {
 }
 
 const fetchComandas = async () => {
-  await comandaStore.fetchComandas(userMasterData.value.id_master)
+  // Get open comandas
+  await comandaStore.fetchComandas(userMasterData.value.id_master, 'open')
   console.info('[FETCH] Comandas toRef: ', comandas.value)
 }
 
