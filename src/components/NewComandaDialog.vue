@@ -45,7 +45,7 @@ const fetchMesas = async () => {
   // Obtenemos las mesas
   await mesaStore.fetchMesas(master_id)
 
-  // obtenemos la lista de mesas con formato para el select
+  // Obtenemos la lista de mesas con formato para el select
   mesasList.value = mesas.value.map(cl => ({
     id: `${cl.id}`,
     title: `${cl.nombre}`,
@@ -53,11 +53,11 @@ const fetchMesas = async () => {
   // Obtenemos la mesa por defecto para el select
   defaultMesa.value = mesas.value.find(mesa => mesa.default === true)
   selectedMesa.value = {
-    id: `${defaultMesa.value.id}`,
-    title: `${defaultMesa.value.nombre}`,
+    id: defaultMesa.value ? parseInt(defaultMesa.value.id, 10) : 0, // 0 or ever default value
+    title: defaultMesa.value ? `${defaultMesa.value.nombre}` : '',
   }
 
-  console.info('[MesasList] ', mesasList)
+  console.info('[selectedMesa.value] ', selectedMesa.value)
 }
 const fetchProductos = async () => {
   await productStore.fetchProductos(master_id)
@@ -93,10 +93,6 @@ const showProducts = selectedProducts => {
   showProductSelection.value = false
 }
 
-// const removeProduct = producto => {
-//   productosSeleccionados.value = productosSeleccionados.value.filter(p => p.id !== producto.id)
-// }
-
 const saveComanda = async () => {
   if (!selectedCliente.value) {
     // || productosSeleccionados.value.length === 0
@@ -107,10 +103,14 @@ const saveComanda = async () => {
   // Create Comanda
   try {
     console.info('[selectedCliente] : ', selectedCliente.value)
+    console.info('[selectedMesa] : ', selectedMesa.value)
 
-    // Cuando creamos cliente nuevo viene como objeto. Nos quedamos con el ID
+    // Cuando creamos cliente y mesa nuevo viene como objeto. Nos quedamos con el ID
     if (typeof selectedCliente.value === 'object' && 'id' in selectedCliente.value) {
       selectedCliente.value = selectedCliente.value.id
+    }
+    if (typeof selectedMesa.value === 'object' && 'id' in selectedMesa.value) {
+      selectedMesa.value = selectedMesa.value.id
     }
 
     // Si no se elige la mesa se pone siempre la de por defecto

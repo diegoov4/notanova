@@ -1,10 +1,12 @@
 <script setup>
-import { ref, onMounted, toRef } from 'vue'
+import { useDisplay } from 'vuetify'
+import { ref, onMounted, computed, toRef } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/authStore'
 import { useComandaStore } from '@/store/comandaStore'
 import { useProductoStore } from '@/store/productoStore'
 
+const { smAndDown } = useDisplay()
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
@@ -20,6 +22,14 @@ const showConfirmDialog = ref(false)
 const titleToConfirmDialog = ref('')
 const textToConfirmDialog = ref('')
 const confirmAction = ref(null)
+const inputWidth = computed(() => {
+  const baseRem = smAndDown.value ? 6.5 : 15
+  const remPerChar = 1 // Add 1 rem when overflow
+  const maxLength = Math.max(
+    ...comanda.value.comandas_productos.map(p => p.cantidad.toString().length)
+  )
+  return `${baseRem + (maxLength - 1) * remPerChar}rem`
+})
 
 const fetchComandaById = async () => {
   if (route.params.id) {
@@ -164,28 +174,36 @@ const eliminarProducto = async producto => {
     <v-card class="pa-4 mb-4 rounded-lg">
       <v-card-title class="d-flex justify-space-between align-center">
         <!-- Cliente -->
-        <span class="text-h4 text-capitalize d-none d-sm-flex">{{ comanda?.clientes.nombre }}</span>
-        <span class="text-h6 text-uppercase mr-2 font-weight-bold text-primary d-sm-none">
+        <span
+          :class="[
+            'font-weight-bold',
+            smAndDown ? 'text-h6 text-uppercase mr-2 text-primary' : 'text-h4 text-capitalize',
+          ]"
+        >
           {{ comanda?.clientes.nombre }}
         </span>
 
         <!-- Mesa -->
-        <span class="text-h5 text-capitalize d-none d-sm-flex">
-          <i-mdi-table-chair class="mr-2" />
-          {{ comanda?.mesas.nombre }}
-        </span>
         <span
-          class="text-subtitle-2 text-uppercase mr-2 font-weight-bold text-blue-grey-darken-3 d-sm-none"
+          :class="[
+            'mr-2',
+            'font-weight-bold',
+            smAndDown
+              ? 'text-subtitle-2 text-uppercase text-blue-grey-darken-3'
+              : 'text-h5 text-capitalize',
+          ]"
         >
-          -
-          {{ comanda?.mesas.nombre }}
+          <i-mdi-table-chair class="mr-2" />
+          <template v-if="!smAndDown">
+            {{ comanda?.mesas.nombre }}
+          </template>
         </span>
 
         <!-- Total -->
         <span class="d-flex text-grey-darken-3">
-          <!-- <span class="text-h5 mr-2 d-none d-sm-flex">Total:</span> -->
           <span
-            class="text-h4 font-weight-bold text-secondary"
+            :class="smAndDown ? 'text-h6' : 'text-h4'"
+            class="font-weight-bold text-secondary"
             style="cursor: pointer"
             @click="promptCerrarComanda"
           >
@@ -205,30 +223,20 @@ const eliminarProducto = async producto => {
           </template>
           <!-- Desc. Product -->
           <template #title>
-            <span class="text-h5 d-none d-sm-flex">{{ producto_b.producto.titulo }}</span>
-            <span class="text-subtitle-2 text-uppercase font-weight-bold d-sm-none">
+            <span
+              :class="smAndDown ? 'text-subtitle-2 text-uppercase font-weight-bold' : 'text-h5'"
+            >
               {{ producto_b.producto.titulo }}
             </span>
           </template>
           <!-- Cantidad -->
           <template #subtitle>
-            <div class="selector-cantidad pl-6">
+            <div :class="smAndDown ? '' : 'pl-6'" :style="{ width: inputWidth }">
               <v-text-field variant="plain">
                 <template #prepend>
-                  <!-- Uses classes to responsive mode -->
                   <v-btn
                     color="#c7c7c7"
-                    class="d-none d-sm-flex"
-                    size="55"
-                    icon
-                    @click="decrement(producto_b)"
-                  >
-                    <i-ph-minus-bold />
-                  </v-btn>
-                  <v-btn
-                    color="#c7c7c7"
-                    class="d-sm-none"
-                    size="35"
+                    :size="smAndDown ? 27 : 55"
                     icon
                     @click="decrement(producto_b)"
                   >
@@ -238,21 +246,10 @@ const eliminarProducto = async producto => {
                 <div class="cantidad">
                   {{ producto_b.cantidad }}
                 </div>
-
                 <template #append>
                   <v-btn
                     color="#c7c7c7"
-                    class="d-none d-sm-flex"
-                    size="55"
-                    icon
-                    @click="increment(producto_b)"
-                  >
-                    <i-ph-plus-bold />
-                  </v-btn>
-                  <v-btn
-                    color="#c7c7c7"
-                    class="d-sm-none"
-                    size="35"
+                    :size="smAndDown ? 27 : 55"
                     icon
                     @click="increment(producto_b)"
                   >

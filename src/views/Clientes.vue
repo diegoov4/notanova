@@ -1,8 +1,10 @@
 <script setup>
+import { useDisplay } from 'vuetify'
 import { ref, onMounted, toRef } from 'vue'
 import { useAuthStore } from '@/store/authStore'
 import { useClientStore } from '@/store/clienteStore'
 
+const { smAndDown } = useDisplay()
 const authStore = useAuthStore()
 const clientStore = useClientStore()
 const userMasterData = toRef(authStore, 'userMasterData')
@@ -48,10 +50,16 @@ const deleteCliente = async () => {
     <v-card class="pa-4 mb-4 rounded-lg">
       <!-- Header -->
       <v-card-title class="d-flex justify-space-between align-center mb-5">
-        <span class="text-h4 text-primary font-weight-bold text-uppercase d-none d-sm-flex">
+        <span
+          :class="[
+            'text-primary',
+            'font-weight-bold',
+            'text-uppercase',
+            smAndDown ? 'text-h5' : 'text-h4',
+          ]"
+        >
           Clientes
         </span>
-        <span class="text-h5 text-primary font-weight-bold text-uppercase d-sm-none">Clientes</span>
       </v-card-title>
 
       <v-divider color="primary" :thickness="3"></v-divider>
@@ -61,7 +69,6 @@ const deleteCliente = async () => {
         <v-list-item v-for="cliente in clientes" :key="cliente.id">
           <!-- Client avatar (standard) -->
           <template #prepend>
-            <!-- <v-avatar size="70" image="@/assets/header_logo.png" alt="cliente" /> -->
             <v-btn icon class="mr-6" color="grey">
               <i-mdi-card-account-details />
             </v-btn>
@@ -81,12 +88,18 @@ const deleteCliente = async () => {
 
           <!-- Delete Client -->
           <template #append>
-            <v-btn stacked size="55" class="ml-16" color="primary" @click="updateCliente(cliente)">
+            <v-btn
+              stacked
+              :size="smAndDown ? 27 : 55"
+              class="ml-16"
+              color="primary"
+              @click="updateCliente(cliente)"
+            >
               <i-mdi-content-save-edit-outline />
             </v-btn>
             <v-btn
               stacked
-              size="55"
+              :size="smAndDown ? 27 : 55"
               class="ml-16"
               color="error"
               @click="promptDeleteCliente(cliente)"
