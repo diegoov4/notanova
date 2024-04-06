@@ -1,18 +1,25 @@
 // src/plugins/vuetify.js
+import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
 import 'vuetify/styles'
 import colors from 'vuetify/util/colors'
+import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
 export default createVuetify({
+  icons: {
+    defaultSet: 'mdi',
+    aliases,
+    sets: {
+      mdi,
+    },
+  },
   theme: {
     themes: {
       light: {
         dark: false,
         colors: {
           primary: '#007651',
-          // primary: colors.teal.lighten3,
           secondary: '#998402',
-          // secondary: colors.amber.accent3,
           success: colors.lightGreen.lighten1,
           warning: colors.yellow.lighten1,
           error: '#da2911',

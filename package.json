@@ -23,6 +23,7 @@
   "devDependencies": {
     "@iconify-json/mdi": "^1.1.64",
     "@iconify-json/ph": "^1.1.11",
+    "@mdi/font": "^7.4.47",
     "@rushstack/eslint-patch": "^1.7.2",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/eslint-config-prettier": "^9.0.0",

@@ -4,12 +4,12 @@ import es from 'vuetify/lib/locale/es'
 const messages = {
   es: {
     ...es,
-    // Añadir o sobrescribir traducciones
+    // Add traductions
   },
 }
 
 const i18n = createI18n({
-  locale: 'es', // set locale Español
+  locale: 'es', // set locale 'Español'
   messages,
 })
 

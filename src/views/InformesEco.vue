@@ -265,11 +265,11 @@ const filterByDate = (comandas, start, end) => {
             <span class="ml-1">(x{{ prod.cantidad }})</span>
           </tr>
         </template>
-        <!-- [EXPANDEN ICON] -->
-        <template #[`item.data-table-expand`]="{ isExpanded, toggleExpand }">
+        <!-- [EXPANDEN ICON] Only Custom-->
+        <!-- <template #[`item.data-table-expand`]="{ isExpanded, toggleExpand }">
           <i-mdi-chevron-down v-if="isExpanded" class="cursor-pointer" @click="toggleExpand" />
           <i-mdi-chevron-up v-else class="cursor-pointer" @click="toggleExpand" />
-        </template>
+        </template> -->
 
         <!-- FOOTER slot -->
         <!-- <template #bottom>
