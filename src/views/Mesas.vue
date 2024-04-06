@@ -14,7 +14,7 @@ const showMesaNueva = ref(false)
 const titleToConfirmDialog = ref('')
 const textToConfirmDialog = ref('')
 const holdTimer = ref(null)
-const holdDelay = 1500
+const holdDelay = 1000
 const nuevaMesa = ref({
   nombre: '',
   default: false,

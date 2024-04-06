@@ -179,14 +179,25 @@ const filterByDate = (comandas, start, end) => {
         </v-col>
       </v-row>
 
-      <!-- Data Table -->
+      <!-- ################### -->
+
+      <!-- TABLE -->
       <v-data-table
         :headers="headers"
         :items="filteredComandas"
         item-key="id"
         :items-per-page="itemsPerPage"
         class="elevation-3"
+        expand-on-click
+        show-expand
       >
+        <!-- TOP -->
+        <template #top>
+          <v-toolbar flat color="#00765126" class="rounded">
+            <v-toolbar-title class="font-italic">Informe de Ingresos y Clientes</v-toolbar-title>
+          </v-toolbar>
+        </template>
+
         <!-- HEADER -->
         <template #headers="{ columns, isSorted, toggleSort }">
           <tr>
@@ -221,7 +232,7 @@ const filterByDate = (comandas, start, end) => {
           </tr>
         </template>
 
-        <!-- BODY -->
+        <!-- BODY: Comandas -->
         <template #[`item.clientes.nombre`]="{ item }">
           <span class="text-h6 text-blue-grey-darken-3 text-button font-italic">
             {{ item.clientes.nombre }}
@@ -244,7 +255,23 @@ const filterByDate = (comandas, start, end) => {
           </v-chip>
         </template>
 
-        <!-- FOOTER -->
+        <!-- EXPANDED: Products info-->
+        <template #expanded-row="{ item }">
+          <tr v-for="prod in item.comandas_productos" :key="prod.id">
+            <v-avatar class="ml-4" :image="prod.producto.images.url" />
+            <span class="text-overline ml-4">
+              {{ prod.producto.titulo }}
+            </span>
+            <span class="ml-1">(x{{ prod.cantidad }})</span>
+          </tr>
+        </template>
+        <!-- [EXPANDEN ICON] -->
+        <template #[`item.data-table-expand`]="{ isExpanded, toggleExpand }">
+          <i-mdi-chevron-down v-if="isExpanded" class="cursor-pointer" @click="toggleExpand" />
+          <i-mdi-chevron-up v-else class="cursor-pointer" @click="toggleExpand" />
+        </template>
+
+        <!-- FOOTER slot -->
         <!-- <template #bottom>
           <v-divider></v-divider>
           <v-row justify="end" class="ma-4">
@@ -261,6 +288,7 @@ const filterByDate = (comandas, start, end) => {
       <!-- FOOTER: Total -->
       <v-row class="py-2">
         <v-col class="text-h6 d-flex align-end flex-column mr-8">
+          Resumen de gasto
           <v-chip color="secondary" class="text-h5 mr-8">{{ formatCurrency(totalSum) }}</v-chip>
         </v-col>
       </v-row>

@@ -9,24 +9,25 @@ const comandaStore = useComandaStore()
 const userMasterData = toRef(authStore, 'userMasterData')
 const comandas = toRef(comandaStore, 'comandas')
 const search = ref('')
+const itemsPerPage = 12
 // date pickers
 const startDate = ref(null)
 const endDate = ref(null)
 
 // Report HEADERS
 const headers = ref([
-  { text: 'Cliente', align: 'start', sortable: false, value: 'clientes.nombre' },
-  { text: 'Fecha creación', value: 'created_at' },
-  { text: 'Fecha cierre', value: 'closed_at' },
-  //   { text: 'Estado', value: 'status' }, //DMO: Feature: quitar status y poner en un color u otro el 'closed_at' según status
-  { text: 'Creado por', value: 'created_by' },
-  { text: 'Total (€)', value: 'total' },
+  { title: 'Cliente', align: 'start', sortable: false, key: 'clientes.nombre' },
+  { title: 'Fecha creación', sortable: true, key: 'created_at' },
+  { title: 'Cerrada en', sortable: true, removable: true, key: 'closed_at' },
+  //   { title: 'Estado', key: 'status' },
+  { title: 'Creado por', removable: true, key: 'created_by' },
+  { title: 'Total (€)', removable: true, key: 'total' },
 ])
 
 // Get all Comandas (without status)
 onMounted(async () => {
   await comandaStore.fetchComandas(userMasterData.value.id_master)
-  console.info('[COMANDAS] ', comandas)
+  // console.info('[COMANDAS] ', comandas)
 })
 
 const formatDate = (dateString, hours) => {
@@ -44,11 +45,23 @@ const formattedEndDate = computed(() => {
   return endDate.value ? formatDate(endDate.value, false) : ''
 })
 
+const removeHeader = key => {
+  headers.value = headers.value.filter(header => header.key !== key)
+}
+
 const resetFilters = () => {
   search.value = ''
   startDate.value = null
   endDate.value = null
 }
+
+const totalSum = computed(() => {
+  const sum = filteredComandas.value.reduce((sum, comanda) => {
+    return sum + (comanda.total || 0)
+  }, 0)
+  console.info(sum)
+  return sum
+})
 
 // Currency format (€)
 const formatCurrency = value => {
@@ -96,13 +109,27 @@ const filterByDate = (comandas, start, end) => {
   <v-container>
     <v-card class="pa-4 mb-4 rounded-lg">
       <!-- Header -->
-      <v-card-title class="d-flex justify-space-between align-center mb-5">
-        <span class="text-h4 text-primary font-weight-bold text-capitalize d-none d-sm-flex">
-          Informe de gastos
+      <v-card-title class="d-flex align-center justify-space-between mb-5">
+        <!-- <div class="d-flex align-center"> -->
+        <i-ph-currency-circle-dollar />
+        <span
+          class="text-h6 text-primary font-weight-bold text-capitalize font-italic ml-3 d-none d-sm-flex"
+        >
+          Reporte Economico
         </span>
-        <span class="text-button text-primary font-weight-bold text-uppercase d-sm-none">
-          Informe de gastos
+        <span
+          class="text-button text-primary font-weight-bold text-button font-italic ml-2 d-sm-none"
+        >
+          Reporte Economico
         </span>
+        <!-- </div> -->
+        <!-- <v-btn icon class="cursor-pointer text-red-lighten-2 ml-10" @click="resetFilters">
+          <i-ph-pencil-simple-slash-duotone />
+        </v-btn> -->
+        <i-ph-pencil-simple-slash-duotone
+          class="text-h5 cursor-pointer text-red-lighten-2 ml-6 pt-1"
+          @click="resetFilters"
+        />
       </v-card-title>
 
       <v-divider color="primary" :thickness="3"></v-divider>
@@ -153,30 +180,50 @@ const filterByDate = (comandas, start, end) => {
       </v-row>
 
       <!-- Data Table -->
-      <v-data-table :headers="headers" :items="filteredComandas" item-key="id">
-        <template #header="{ props }">
-          <thead>
-            <tr>
-              <!-- new cell for 'clean' button -->
-              <th>
-                <v-btn
-                  v-if="search.value || startDate.value || endDate.value"
-                  small
-                  text
-                  @click="resetFilters"
+      <v-data-table
+        :headers="headers"
+        :items="filteredComandas"
+        item-key="id"
+        :items-per-page="itemsPerPage"
+        class="elevation-3"
+      >
+        <!-- HEADER -->
+        <template #headers="{ columns, isSorted, toggleSort }">
+          <tr>
+            <template v-for="column in columns" :key="column.key">
+              <td>
+                <span
+                  :class="[
+                    column.sortable ? 'cursor-pointer' : 'cursor-not-allowed',
+                    'text-blue-grey-darken-2',
+                    'text-uppercase',
+                    'font-weight-bold',
+                  ]"
+                  @click="column.sortable ? toggleSort(column) : null"
                 >
-                  Limpiar filtros
-                </v-btn>
-              </th>
-              <!-- ... rest headers -->
-              <th v-for="header in props.headers" :key="header.text">
-                {{ header.text }}
-              </th>
-            </tr>
-          </thead>
+                  {{ column.title }}
+                </span>
+                <!-- Icon sortable -->
+                <template v-if="isSorted(column)">
+                  <i-mdi-chevron-down
+                    class="cursor-pointer ml-1 pt-1"
+                    @click="column.sortable ? toggleSort(column) : null"
+                  />
+                </template>
+                <!-- Delete Column -->
+                <i-ph-x
+                  v-if="column.removable"
+                  class="cursor-pointer text-red-lighten-2 ml-6 pt-1"
+                  @click="removeHeader(column.key)"
+                />
+              </td>
+            </template>
+          </tr>
         </template>
+
+        <!-- BODY -->
         <template #[`item.clientes.nombre`]="{ item }">
-          <span class="text-h6 text-blue-grey-darken-3 text-capitalize">
+          <span class="text-h6 text-blue-grey-darken-3 text-button font-italic">
             {{ item.clientes.nombre }}
           </span>
         </template>
@@ -192,12 +239,18 @@ const filterByDate = (comandas, start, end) => {
           <span v-else class="text-subtitle-2 text-primary font-italic">- activa -</span>
         </template>
         <template #[`item.total`]="{ item }">
-          <span class="text-subtitle-2 text-secondary font-weight-bold">
+          <v-chip color="secondary">
             {{ formatCurrency(item.total) }}
-          </span>
+          </v-chip>
         </template>
-        <!-- ... more slots ... -->
       </v-data-table>
+
+      <!-- FOOTER: Total -->
+      <v-row class="py-2">
+        <v-col class="text-h6 d-flex align-end flex-column mr-8">
+          <v-chip color="secondary" class="text-h5 mr-8">{{ formatCurrency(totalSum) }}</v-chip>
+        </v-col>
+      </v-row>
     </v-card>
   </v-container>
 </template>

@@ -91,7 +91,7 @@ const deleteCliente = async () => {
             <v-btn
               stacked
               :size="smAndDown ? 27 : 55"
-              class="ml-16"
+              :class="smAndDown ? 'ml-1' : 'ml-16'"
               color="primary"
               @click="updateCliente(cliente)"
             >
@@ -100,7 +100,7 @@ const deleteCliente = async () => {
             <v-btn
               stacked
               :size="smAndDown ? 27 : 55"
-              class="ml-16"
+              :class="smAndDown ? 'ml-2' : 'ml-16'"
               color="error"
               @click="promptDeleteCliente(cliente)"
             >
