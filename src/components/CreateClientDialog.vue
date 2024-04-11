@@ -9,7 +9,7 @@ const newClientName = ref('')
 const authStore = useAuthStore()
 const clientStore = useClientStore()
 const userMasterData = toRef(authStore, 'userMasterData')
-const master_id = userMasterData.value.id
+const master_id = userMasterData.value.id_master
 
 const addNewClient = async () => {
   if (!newClientName.value.trim()) {

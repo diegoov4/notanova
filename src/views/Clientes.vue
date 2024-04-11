@@ -9,7 +9,7 @@ const authStore = useAuthStore()
 const clientStore = useClientStore()
 const userMasterData = toRef(authStore, 'userMasterData')
 const clientes = toRef(clientStore, 'clientes')
-const master_id = userMasterData.value.id
+const master_id = userMasterData.value.id_master
 const showConfirmDialog = ref(false)
 const clientToDelete = ref(null)
 

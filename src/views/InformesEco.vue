@@ -1,9 +1,11 @@
 <script setup>
+import { useDisplay } from 'vuetify'
 import { onMounted, computed, toRef, ref } from 'vue'
 import { useAuthStore } from '@/store/authStore'
 import { useComandaStore } from '@/store/comandaStore'
 import { format } from 'date-fns'
 
+const { smAndDown } = useDisplay()
 const authStore = useAuthStore()
 const comandaStore = useComandaStore()
 const userMasterData = toRef(authStore, 'userMasterData')
@@ -113,14 +115,15 @@ const filterByDate = (comandas, start, end) => {
         <!-- <div class="d-flex align-center"> -->
         <i-ph-currency-circle-dollar />
         <span
-          class="text-h6 text-primary font-weight-bold text-capitalize font-italic ml-3 d-none d-sm-flex"
+          :class="[
+            'text-primary',
+            'font-weight-bold',
+            'text-capitalize',
+            'font-italic',
+            smAndDown ? 'text-button ml-2' : 'text-h6 ml-3',
+          ]"
         >
-          Reporte Economico
-        </span>
-        <span
-          class="text-button text-primary font-weight-bold text-button font-italic ml-2 d-sm-none"
-        >
-          Reporte Economico
+          Reporte Económico
         </span>
         <!-- </div> -->
         <!-- <v-btn icon class="cursor-pointer text-red-lighten-2 ml-10" @click="resetFilters">
@@ -144,7 +147,7 @@ const filterByDate = (comandas, start, end) => {
       <!-- Filters: Date Range created_at -->
       <v-row>
         <v-col cols="12" md="6">
-          <v-menu transition="scale-transition" offset-y>
+          <v-menu transition="scale-transition" offset-y :close-on-content-click="false">
             <template #activator="{ props }">
               <v-text-field
                 v-model="formattedStartDate"
@@ -157,11 +160,11 @@ const filterByDate = (comandas, start, end) => {
                 </template>
               </v-text-field>
             </template>
-            <v-date-picker v-model="startDate" color="primary"></v-date-picker>
+            <v-date-picker v-model="startDate" locale="es" color="primary"></v-date-picker>
           </v-menu>
         </v-col>
         <v-col cols="12" md="6">
-          <v-menu transition="scale-transition" offset-y>
+          <v-menu transition="scale-transition" offset-y :close-on-content-click="false">
             <template #activator="{ props }">
               <v-text-field
                 v-model="formattedEndDate"
@@ -174,7 +177,7 @@ const filterByDate = (comandas, start, end) => {
                 </template>
               </v-text-field>
             </template>
-            <v-date-picker v-model="endDate" color="primary"></v-date-picker>
+            <v-date-picker v-model="endDate" locale="es" color="primary"></v-date-picker>
           </v-menu>
         </v-col>
       </v-row>

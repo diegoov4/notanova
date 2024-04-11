@@ -21,6 +21,11 @@ export const useComandaStore = defineStore('comanda', {
         throw new Error('Master ID is required')
       }
 
+      // Get 1st day of Previous Year (curr - 2)
+      const firstDayOfPrevYear = new Date(new Date().getFullYear() - 1, 0, 1)
+      // Format date for Supabase (ISO 8601)
+      const firstDayOfPrevYearISO = firstDayOfPrevYear.toISOString()
+
       let query = supabase
         .from('comandas')
         .select(
@@ -38,13 +43,19 @@ export const useComandaStore = defineStore('comanda', {
                     productos (
                         *,
                         images (
-                            url
-                        )
+                          url,
+                          product_types (
+                              id,
+                              categoria,
+                              subcategoria
+                          )
+                      )
                     )
                 )
           `
         )
         .eq('id_master', id_master)
+        .gte('created_at', firstDayOfPrevYearISO) // OBTENEMOS LAS COMANDAS DE LOS DOS ULTIMOS AÑOS
         .order('created_at', { ascending: false })
 
       // Apply status filter only if status is provided
@@ -100,8 +111,13 @@ export const useComandaStore = defineStore('comanda', {
                             productos (
                                 *,
                                 images (
-                                    url
-                                )
+                                  url,
+                                  product_types (
+                                      id,
+                                      categoria,
+                                      subcategoria
+                                  )
+                              )
                             )
                         )
                     `

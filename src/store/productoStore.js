@@ -54,7 +54,6 @@ export const useProductoStore = defineStore('producto', {
         if (productsError) {
           console.error('[STORE]Error al cargar los productos:', productsError)
         } else {
-          // NO LLEGA AQUI
           console.info('[STORE] productos', productsData)
           // Inicializa la cantidad para cada producto aquí
           const productosConCantidad = productsData.map(product => ({

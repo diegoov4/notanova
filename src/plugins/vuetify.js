@@ -4,6 +4,8 @@ import { createVuetify } from 'vuetify'
 import 'vuetify/styles'
 import colors from 'vuetify/util/colors'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
+// import DateFnsAdapter from '@date-io/date-fns'
+import es from 'date-fns/locale/es'
 
 export default createVuetify({
   icons: {
@@ -11,6 +13,12 @@ export default createVuetify({
     aliases,
     sets: {
       mdi,
+    },
+  },
+  date: {
+    // adapter: DateFnsAdapter,
+    locale: {
+      es,
     },
   },
   theme: {
