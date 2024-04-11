@@ -91,9 +91,9 @@ const removeHeader = key => {
 const resetFilters = () => {
   search.value = ''
   selectedType.value = ''
-  // DMO: No borrar nunca el filtrado de meses
-  // startDate.value = null
-  // endDate.value = null
+  // when reset set curren month //DMO: comentamos de momento ya que puede que solo queramos borrar tipos o la busqueda y no joder el rango de fechas
+  // startDate.value = startOfMonth(new Date())
+  // endDate.value = endOfMonth(new Date())
 }
 
 // Filter by 'Search' and Date Range
