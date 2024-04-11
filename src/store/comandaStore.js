@@ -176,7 +176,7 @@ export const useComandaStore = defineStore('comanda', {
             },
           ])
           .select()
-        console.info('COMANDA CREADA[STORE]: ', comanda)
+        // console.info('COMANDA CREADA[STORE]: ', comanda)
         if (comandaError) throw comandaError
 
         if (!comanda || comanda.length === 0) {

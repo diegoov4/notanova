@@ -39,7 +39,7 @@ const fetchClients = async () => {
     id: `${cl.id}`,
     title: `${cl.nombre}`,
   }))
-  console.info('[ClientesList] ', clientesList)
+  // console.info('[ClientesList] ', clientesList)
 }
 const fetchMesas = async () => {
   // Obtenemos las mesas
@@ -57,7 +57,7 @@ const fetchMesas = async () => {
     title: defaultMesa.value ? `${defaultMesa.value.nombre}` : '',
   }
 
-  console.info('[selectedMesa.value] ', selectedMesa.value)
+  // console.info('[selectedMesa.value] ', selectedMesa.value)
 }
 const fetchProductos = async () => {
   await productStore.fetchProductos(master_id)
@@ -102,8 +102,8 @@ const saveComanda = async () => {
 
   // Create Comanda
   try {
-    console.info('[selectedCliente] : ', selectedCliente.value)
-    console.info('[selectedMesa] : ', selectedMesa.value)
+    // console.info('[selectedCliente] : ', selectedCliente.value)
+    // console.info('[selectedMesa] : ', selectedMesa.value)
 
     // Cuando creamos cliente y mesa nuevo viene como objeto. Nos quedamos con el ID
     if (typeof selectedCliente.value === 'object' && 'id' in selectedCliente.value) {

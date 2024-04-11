@@ -20,7 +20,6 @@ const closeDialog = () => {
 const fetchComandas = async () => {
   // Get open comandas
   await comandaStore.fetchComandas(userMasterData.value.id_master, 'open')
-  console.info('[FETCH] Comandas toRef: ', comandas.value)
 }
 
 onMounted(fetchComandas)

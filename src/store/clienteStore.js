@@ -28,7 +28,7 @@ export const useClientStore = defineStore('cliente', {
       if (error) console.error('Error al cargar clientes:', error)
       else {
         this.clientes = data
-        console.info('CLIENTES[fetchClients_IN]', data)
+        // console.info('CLIENTES[fetchClients_IN]', data)
       }
     },
 
@@ -56,7 +56,7 @@ export const useClientStore = defineStore('cliente', {
         console.error('[STORE]Error al crear cliente:', error)
         throw error
       } else {
-        console.info('[STORE]CLIENTE: ', capitalizeClientName, ' CREADO')
+        // console.info('[STORE]CLIENTE: ', capitalizeClientName, ' CREADO')
         return data[0]
       }
     },

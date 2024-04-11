@@ -45,7 +45,7 @@ export const useAuthStore = defineStore('auth', {
         return false
       } else {
         this.setUserMasterData(data)
-        console.info('[STORE] AUTH_USER_MASTER_DATA: ', data)
+        // console.info('[STORE] AUTH_USER_MASTER_DATA: ', data)
         return true
       }
     },

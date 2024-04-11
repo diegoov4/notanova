@@ -61,7 +61,7 @@ const totalSum = computed(() => {
   const sum = filteredComandas.value.reduce((sum, comanda) => {
     return sum + (comanda.total || 0)
   }, 0)
-  console.info(sum)
+  // console.info(sum)
   return sum
 })
 

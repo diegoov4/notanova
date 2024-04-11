@@ -9,7 +9,7 @@ const emit = defineEmits(['close', 'select'])
 
 const productosStore = useProductoStore()
 const images = toRef(productosStore, 'images')
-const productTypes = toRef(productosStore, 'product_types')
+// const productTypes = toRef(productosStore, 'product_types')
 const selectedType = ref('')
 
 const selectImage = image => {
@@ -19,7 +19,7 @@ const selectImage = image => {
 
 const fetchImages = async () => {
   await productosStore.fetchImages()
-  console.info('[fetchTypes] ', productTypes, '[fetchImages] ', images)
+  // console.info('[fetchTypes] ', productTypes, '[fetchImages] ', images)
 }
 
 onMounted(fetchImages)

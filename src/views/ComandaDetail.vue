@@ -35,7 +35,6 @@ const fetchComandaById = async () => {
   if (route.params.id) {
     // Get Comanda data
     await comandaStore.fetchComandaById(route.params.id)
-    console.info('[COMANDA] ', comanda)
   } else {
     console.error('Invalid Param ID: ', route.params.id)
   }
@@ -84,11 +83,7 @@ function recalcularTotal() {
 }
 
 const showProducts = selectedProducts => {
-  console.info('[STORE_showProducts]selectedProducts: ', selectedProducts)
-  console.info(
-    '[STORE_showProducts]comanda.value.comandas_productos: ',
-    comanda.value.comandas_productos
-  )
+  // console.info('[STORE_showProducts]selectedProducts: ', selectedProducts)
   // Añadir productos seleccionados a la comanda existente
   selectedProducts.forEach(product => {
     const existingProduct = comanda.value.comandas_productos.find(p => p.producto.id === product.id)
@@ -105,7 +100,7 @@ const showProducts = selectedProducts => {
   showProductSelection.value = false
 
   // Actualizar la comanda en el backend con los nuevos productos
-  console.info('Lista Productos a Actualizar: ', comanda.value.comandas_productos)
+  // console.info('Lista Productos a Actualizar: ', comanda.value.comandas_productos)
   comandaStore.updateProductsComanda(comanda.value.id, comanda.value.comandas_productos)
 }
 
@@ -163,7 +158,7 @@ const cerrarComanda = async () => {
 }
 
 const eliminarProducto = async producto => {
-  console.info('[EliminarProducto]: ', producto)
+  // console.info('[EliminarProducto]: ', producto)
   await comandaStore.deleteProducto(comanda.value.id, producto.producto.id)
 }
 </script>

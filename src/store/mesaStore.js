@@ -23,7 +23,6 @@ export const useMesaStore = defineStore('mesa', {
       if (error) console.error('Error al cargar las mesas:', error)
       else {
         this.mesas = data
-        console.info('MESAS[fetchMesas_IN]', data)
       }
     },
 

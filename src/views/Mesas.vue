@@ -59,7 +59,6 @@ const agregarNuevaMesa = async () => {
     const nuevaMesaCreado = await mesaStore.createMesa(nuevaMesa.value, master_id)
     if (nuevaMesaCreado) {
       mesas.value.push(nuevaMesaCreado)
-      console.info('[Mesa]Mesas: ', mesas)
     }
     // Clean vars
     nuevaMesa.value = { nombre: '', default: false, forma: 'rectangular' }

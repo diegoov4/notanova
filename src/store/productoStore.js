@@ -31,7 +31,7 @@ export const useProductoStore = defineStore('producto', {
       if (productTypesError) {
         console.error('[STORE]Error al cargar los Tipos de Productos:', productTypesError)
       } else {
-        console.info('[STORE] Tipo Productos', productTypesData)
+        // console.info('[STORE] Tipo Productos', productTypesData)
 
         // Get Products (all including images & types)
         const { data: productsData, error: productsError } = await supabase
@@ -54,7 +54,7 @@ export const useProductoStore = defineStore('producto', {
         if (productsError) {
           console.error('[STORE]Error al cargar los productos:', productsError)
         } else {
-          console.info('[STORE] productos', productsData)
+          // console.info('[STORE] productos', productsData)
           // Inicializa la cantidad para cada producto aquí
           const productosConCantidad = productsData.map(product => ({
             ...product,

@@ -48,7 +48,7 @@ const breakpoints = ref({
 })
 
 const filteredProducts = computed(() => {
-  console.info('[selectedType] ', selectedType.value)
+  // console.info('[selectedType] ', selectedType.value)
   if (selectedType.value) {
     return productos.value.filter(producto => {
       return producto.images.product_types.id === parseInt(selectedType.value, 10)
@@ -63,14 +63,14 @@ const handleImageSelect = image => {
   nuevoProducto.value.id_imagen = image.id
   nuevoProducto.value.url = image.url
   nuevoProducto.value.type = image.type
-  console.info(
-    '[Selector_Image]: ',
-    nuevoProducto.value,
-    'New Image: ',
-    image,
-    '[SelectedImage]',
-    selectedImage
-  )
+  // console.info(
+  //   '[Selector_Image]: ',
+  //   nuevoProducto.value,
+  //   'New Image: ',
+  //   image,
+  //   '[SelectedImage]',
+  //   selectedImage
+  // )
 }
 
 const fetchProductos = async () => {
@@ -102,7 +102,7 @@ const agregarNuevoProducto = async () => {
       nuevoProductoCreado.images.url = nuevoProducto.value.url
       nuevoProductoCreado.images.product_types.id = nuevoProducto.value.type
       productos.value.push(nuevoProductoCreado)
-      console.info('[Productos]productos: ', productos)
+      // console.info('[Productos]productos: ', productos)
     }
     // Clean vars
     nuevoProducto.value = { titulo: '', id_imagen: 27, url: '', precio: '' }
@@ -144,7 +144,7 @@ const resetConfirmDialog = () => {
 
 const deleteProduct = async () => {
   const producto = productToDelete.value
-  console.info('deleteProduct: ', producto)
+  // console.info('deleteProduct: ', producto)
   try {
     const eliminado = await productosStore.deleteProducto(producto.id, master_id)
 
