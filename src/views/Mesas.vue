@@ -13,8 +13,9 @@ const mesaToDelete = ref(null)
 const showMesaNueva = ref(false)
 const titleToConfirmDialog = ref('')
 const textToConfirmDialog = ref('')
-const holdTimer = ref(null)
-const holdDelay = 1000
+// DMO: Doesnt work fine
+// const holdTimer = ref(null)
+// const holdDelay = 1000
 const nuevaMesa = ref({
   nombre: '',
   default: false,
@@ -47,7 +48,7 @@ const deleteMesa = async () => {
   showConfirmDialog.value = false
   const isDelete = await mesaStore.deleteMesa(mesaToDelete.value.id)
   if (isDelete) {
-    // Eliminar mesae de la lista
+    // Eliminar mesa de la lista
     mesas.value = mesas.value.filter(c => c.id !== mesaToDelete.value.id)
     mesaToDelete.value = null
   } else alert('No se ha podido borrar la Mesa') // Handle error
@@ -84,15 +85,20 @@ const resetConfirmDialog = () => {
   showConfirmDialog.value = false
 }
 
-const onMousedown = mesa => {
-  holdTimer.value = setTimeout(() => {
-    promptDeleteMesa(mesa)
-  }, holdDelay)
-}
+// const onMousedown = mesa => {
+//   holdTimer.value = setTimeout(() => {
+//     promptDeleteMesa(mesa)
+//   }, holdDelay)
+// }
 
-const onMouseup = () => {
-  clearTimeout(holdTimer.value)
-}
+// -- en template Mesa
+// @mousedown="onMousedown(mesa)"
+// @mouseup="onMouseup"
+// @mouseleave="onMouseup"
+
+// const onMouseup = () => {
+//   clearTimeout(holdTimer.value)
+// }
 
 // #########################
 // Mesa Styles
@@ -145,9 +151,7 @@ const getShapeClass = shape => {
           :class="mesa.shapeClass"
           class="d-flex flex-column align-center justify-center"
           height="200"
-          @mousedown="onMousedown(mesa)"
-          @mouseup="onMouseup"
-          @mouseleave="onMouseup"
+          @dblclick="promptDeleteMesa(mesa)"
         >
           <div :class="['mesa', mesa.shapeClass]" :style="{ '--mesa-color': mesa.color }">
             <span :class="['mesa-text', 'text-uppercase', `${mesa.shapeClass}-text`]">
