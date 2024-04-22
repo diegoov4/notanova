@@ -150,6 +150,11 @@ const auth_user = authStore.auth_user
       </template>
 
       <v-list>
+        <v-list-item link to="/informes/closeday" title="Cerrar el Dia">
+          <template #prepend>
+            <i-ph-currency-dollar-bold class="mr-2 text-h6" />
+          </template>
+        </v-list-item>
         <v-list-item link to="/informes/economico" title="Economico">
           <template #prepend>
             <i-ph-chart-line-up-bold class="mr-2 text-h6" />

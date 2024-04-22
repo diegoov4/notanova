@@ -23,6 +23,7 @@ const master_id = userMasterData.value.id_master
 const created_by = userMasterData.value.responsable
 const selectedCliente = ref(null)
 const selectedMesa = ref(null)
+const defaultCliente = ref(null)
 const defaultMesa = ref(null)
 const showCreateClientDialog = ref(false)
 const showDropdown = ref(false)
@@ -32,13 +33,21 @@ const optionsList = ref([])
 const clientesList = ref([])
 const mesasList = ref([])
 
-const fetchClients = async () => {
+const fetchClients = async newCliente_l => {
   await clientStore.fetchClients(master_id)
 
+  // Obtenemos la lista de clientes con formato para el select
   clientesList.value = clientes.value.map(cl => ({
     id: `${cl.id}`,
     title: `${cl.nombre}`,
   }))
+  if (newCliente_l === false) return
+  // Obtenemos cliente por defecto para el select
+  defaultCliente.value = clientes.value.find(cliente => cliente.default === true)
+  selectedCliente.value = {
+    id: defaultCliente.value ? parseInt(defaultCliente.value.id, 10) : 1, // 1 or ever default value
+    title: defaultCliente.value ? `${defaultCliente.value.nombre}` : '',
+  }
   // console.info('[ClientesList] ', clientesList)
 }
 const fetchMesas = async () => {
@@ -53,7 +62,7 @@ const fetchMesas = async () => {
   // Obtenemos la mesa por defecto para el select
   defaultMesa.value = mesas.value.find(mesa => mesa.default === true)
   selectedMesa.value = {
-    id: defaultMesa.value ? parseInt(defaultMesa.value.id, 10) : 0, // 0 or ever default value
+    id: defaultMesa.value ? parseInt(defaultMesa.value.id, 10) : 1, // 1 or ever default value (11 - Barra)
     title: defaultMesa.value ? `${defaultMesa.value.nombre}` : '',
   }
 
@@ -68,14 +77,14 @@ const fetchProductos = async () => {
   }))
 }
 onMounted(() => {
-  fetchClients()
+  fetchClients(true)
   fetchMesas()
   fetchProductos()
 })
 
 const clientCreated = cliente => {
   selectedCliente.value = cliente
-  fetchClients()
+  fetchClients(false)
 }
 
 const selectCliente = cliente => {
@@ -102,9 +111,6 @@ const saveComanda = async () => {
 
   // Create Comanda
   try {
-    // console.info('[selectedCliente] : ', selectedCliente.value)
-    // console.info('[selectedMesa] : ', selectedMesa.value)
-
     // Cuando creamos cliente y mesa nuevo viene como objeto. Nos quedamos con el ID
     if (typeof selectedCliente.value === 'object' && 'id' in selectedCliente.value) {
       selectedCliente.value = selectedCliente.value.id
@@ -112,6 +118,11 @@ const saveComanda = async () => {
     if (typeof selectedMesa.value === 'object' && 'id' in selectedMesa.value) {
       selectedMesa.value = selectedMesa.value.id
     }
+
+    // Si no se elige la cliente se pone siempre la de por defecto
+    // if (selectedCliente.value === null) {
+    //   selectedCliente.value = 1
+    // }
 
     // Si no se elige la mesa se pone siempre la de por defecto
     if (selectedMesa.value === null) {
@@ -141,7 +152,10 @@ const saveComanda = async () => {
 // Restablecer estado y cerrar diálogo
 const resetDialog = () => {
   productosSeleccionados.value = []
-  selectedCliente.value = null
+  selectedCliente.value = {
+    id: `${defaultCliente.value.id}`,
+    title: `${defaultCliente.value.nombre}`,
+  }
   selectedMesa.value = {
     id: `${defaultMesa.value.id}`,
     title: `${defaultMesa.value.nombre}`,

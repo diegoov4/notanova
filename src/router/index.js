@@ -8,6 +8,7 @@ import Mesas from '@/views/Mesas.vue'
 import Productos from '@/views/Productos.vue'
 import InformesEco from '@/views/InformesEco.vue'
 import InformesInv from '@/views/InformesInv.vue'
+import InformesCloseDay from '@/views/InformesCloseDay.vue'
 
 const routes = [
   {
@@ -44,6 +45,12 @@ const routes = [
     path: '/productos',
     name: 'Productos',
     component: Productos,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/informes/closeday',
+    name: 'InformesCloseDay',
+    component: InformesCloseDay,
     meta: { requiresAuth: true },
   },
   {
