@@ -1,8 +1,11 @@
 <script setup>
+import { jsPDF } from 'jspdf'
+import 'jspdf-autotable'
 import { useDisplay } from 'vuetify'
 import { onMounted, computed, toRef, ref } from 'vue'
 import { useAuthStore } from '@/store/authStore'
 import { useComandaStore } from '@/store/comandaStore'
+import { supabase } from '@/services/supabase'
 import { startOfDay, endOfDay, format } from 'date-fns'
 
 const { smAndDown } = useDisplay()
@@ -105,6 +108,93 @@ const filteredComandas = computed(() => {
 
   return filteredBySearch
 })
+
+// ##### PDF & Export Tools #####
+const exportToPDF = save => {
+  // eslint-disable-next-line new-cap
+  const doc = new jsPDF()
+
+  doc.autoTable({
+    head: [headers.value.map(header => header.title)],
+    body: filteredComandas.value.map(comanda => [
+      comanda.clientes.nombre,
+      formatDate(comanda.created_at, false),
+      comanda.closed_at ? formatDate(comanda.closed_at, false) : '-',
+      comanda.created_by,
+      `${comanda.total.toFixed(2)} €`,
+    ]),
+    theme: 'striped',
+    startY: 20,
+    styles: { fontSize: 8, cellPadding: 4, overflow: 'linebreak' },
+    columnStyles: { text: { cellWidth: 'auto' } },
+    didDrawPage: data => {
+      doc.text('[El Torres] Reporte Diario', 14, 15)
+    },
+  })
+  if (save) doc.save(getPDFFileName())
+  return doc
+}
+
+const getPDFFileName = () => {
+  const fileExt = 'pdf'
+  let fileName = ''
+  const formattedStartDate = format(startDate.value, 'ddMMyyyy')
+  fileName = `reporte_diario-${formattedStartDate}.${fileExt}`
+
+  return fileName
+}
+
+const generateAndUploadPDF = async () => {
+  const doc = exportToPDF(false)
+  const pdfOutput = doc.output('blob')
+
+  // UPLOAD PDF
+  // eslint-disable-next-line no-unused-vars
+  const { data, error } = await supabase.storage
+    .from('InvToPDF')
+    .upload(getPDFFileName(), pdfOutput, { upsert: true })
+
+  if (error) {
+    console.error('Error uploading PDF:', error.message)
+    return
+  }
+  console.info('PDF successfully uploaded to bucket')
+
+  // Get PUBLIC URL
+  const datapublicURL = await supabase.storage.from('InvToPDF').getPublicUrl(getPDFFileName())
+
+  if (datapublicURL) {
+    // console.info('Public URL:', datapublicURL)
+    return datapublicURL.data.publicUrl
+  } else {
+    console.error('Error getting public URL: URL is null')
+  }
+}
+
+const sendEmailWithPDF = async () => {
+  // Upload & get URL from PDF
+  const pdfUrl = await generateAndUploadPDF()
+  let datesRange = ''
+
+  const formattedStartDate = format(startDate.value, 'dd/MM/yyyy')
+  datesRange = `para el dia ${formattedStartDate}`
+
+  if (pdfUrl) {
+    const subject = encodeURIComponent('[El Torres] Reporte Diario PDF')
+    const body = encodeURIComponent(
+      `Hola,\n\nEn el siguient enlace se podrá descargar el cierre ${datesRange} en PDF:\n\n ${pdfUrl}\n\nSaludos.`
+    )
+
+    const mailtoLink = `mailto:?subject=${subject}&body=${body}`
+
+    // Abrir la URL en una nueva ventana emergente
+    window.open(mailtoLink, '_blank')
+  } else {
+    alert('No se pudo generar el enlace PDF.')
+  }
+}
+
+// ##### PDF & Export Tools #####
 </script>
 
 <template>
@@ -272,10 +362,24 @@ const filteredComandas = computed(() => {
       </v-data-table>
 
       <!-- FOOTER: Total -->
-      <v-row class="py-2">
-        <v-col class="text-h6 d-flex align-end flex-column mr-8">
-          Resumen de gasto
-          <v-chip color="secondary" class="text-h5 mr-8">{{ formatCurrency(totalSum) }}</v-chip>
+      <v-row class="py-2 align-center">
+        <!-- Resumen de gasto -->
+        <v-col cols="12" md="6" class="d-flex justify-start align-center">
+          <span class="text-h6 mr-4">Resumen de gasto:</span>
+          <v-chip color="secondary" class="text-h5">{{ formatCurrency(totalSum) || 0 }} €</v-chip>
+        </v-col>
+
+        <!-- Export burrons -->
+        <v-col cols="12" md="6" class="d-flex justify-end align-center">
+          <span class="text-h6 mr-1">Exportar</span>
+          <i-ph-file-pdf-fill class="text-h5 text-red-accent-1" />
+          <span class="text-h6 mr-4">:</span>
+          <v-btn color="#00765126" @click="exportToPDF(true)">
+            <i-ph-download-bold class="text-h5 text-blue-grey-darken-4" />
+          </v-btn>
+          <v-btn color="#00765126" @click="sendEmailWithPDF">
+            <i-ph-envelope-bold class="text-h5 text-indigo-darken-1" />
+          </v-btn>
         </v-col>
       </v-row>
     </v-card>
